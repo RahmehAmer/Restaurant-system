@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sama Restaurant - From Our Grill to Your Door</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/logo.png" alt="" id="logo-alt">
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" aria-label="Toggle dark mode">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button class="cart-btn" aria-label="Shopping cart">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <a href="menu.html" class="cta-btn" id="header-order-now">Order Now</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <img src="assets/hero-img.jpg" alt="Restaurant hero image">
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-headline" id="hero-headline"></h1>
+                <p class="hero-subheadline" id="hero-subheadline"></p>
+                <a href="menu.html" class="hero-cta" id="hero-cta"></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active" id="nav-home"></a></li>
+                <li><a href="menu.html" class="nav-link" id="nav-menu"></a></li>
+                <li><a href="about.html" class="nav-link" id="nav-about"></a></li>
+                <li><a href="contact.html" class="nav-link" id="nav-contact"></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Special Offers Slider -->
+        <section class="special-offers">
+            <div class="container">
+                <h2 class="section-title" id="special-offers-title"></h2>
+                <div class="slider-container">
+                    <div class="slider-wrapper">
+                        <div class="slider">
+                            <!-- Meals will be dynamically loaded from API -->
+                        </div>
+                    </div>
+                    <button class="slider-prev" aria-label="Previous slide">‹</button>
+                    <button class="slider-next" aria-label="Next slide">›</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Badges -->
+        <section class="trust-badges">
+            <div class="container">
+                <h2 class="section-title" id="trust-title"></h2>
+                <div class="trust-grid">
+                    <div class="trust-item">
+                        <div class="trust-icon">🥗</div>
+                        <h3 id="trust-badge-1"></h3>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🚀</div>
+                        <h3 id="trust-badge-2"></h3>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">⭐</div>
+                        <h3 id="trust-badge-3"></h3>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🕐</div>
+                        <h3 id="trust-badge-4"></h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Card -->
+        <section class="horizontal-card">
+            <div class="container">
+                <div class="card-content">
+                    <div class="card-text">
+                        <h2 id="horizontal-card-ready"></h2>
+                        <p id="horizontal-card-description"></p>
+                        <a href="menu.html" class="card-cta" id="horizontal-card-cta"></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3 id="footer-policies-title"></h3>
+                    <ul>
+                        <li><a href="#" id="footer-privacy"></a></li>
+                        <li><a href="#" id="footer-terms"></a></li>
+                        <li><a href="#" id="footer-returns"></a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3 id="footer-contact-title"></h3>
+                    <ul>
+                        <li id="footer-phone"></li>
+                        <li id="footer-email"></li>
+                        <li id="footer-location"></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3 id="footer-social-title"></h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Instagram" id="footer-instagram"></a>
+                        <a href="#" aria-label="X" id="footer-twitter"></a>
+                        <a href="#" aria-label="Facebook" id="footer-facebook"></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3 id="footer-hours-title"></h3>
+                    <ul id="footer-hours-list">
+                        <!-- Hours will be populated from content.js -->
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p id="footer-copyright"></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="content.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
