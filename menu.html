@@ -14,9 +14,9 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <img src="assets/logo.png" alt="Sama Restaurant Logo">
-                </div>
+                <a href="index.html" class="logo">
+                    <img src="assets/logo.png" alt="Sama Restaurant Logo" id="logo-alt">
+                </a>
                 <div class="header-actions">
                     <button class="theme-toggle" aria-label="Toggle dark mode">
                         <span class="theme-icon">🌙</span>
@@ -25,31 +25,59 @@
                         <span class="cart-icon">🛒</span>
                         <span class="cart-count">0</span>
                     </button>
-                    <a href="menu.html" class="cta-btn">Order Now</a>
+                    <a href="menu.html" class="cta-btn" id="header-order-now">Order Now</a>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="navigation">
-        <div class="container">
-            <ul class="nav-links">
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="menu.html" class="nav-link active">Menu</a></li>
-                <li><a href="about.html" class="nav-link">About</a></li>
-                <li><a href="contact.html" class="nav-link">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Navigation removed from menu page as requested -->
 
     <!-- Main Content -->
-    <main>
+    <main class="main">
         <div class="container">
-            <h1 class="section-title">Our Menu</h1>
-            <div class="menu-grid">
-                <!-- Menu items will be dynamically loaded here -->
-            </div>
+            <!-- Menu Section -->
+            <section class="menu-section">
+                <h1 class="section-title" id="menu-title">Our Menu</h1>
+                
+                <!-- Categories -->
+                <div class="categories-container">
+                    <div class="categories-grid" id="categories-grid">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Sorting Controls -->
+                <div class="sorting-controls">
+                    <label for="sort-select" class="sort-label">Sort by Price:</label>
+                    <select id="sort-select" class="sort-select">
+                        <option value="default">Default</option>
+                        <option value="low-to-high">Low to High</option>
+                        <option value="high-to-low">High to Low</option>
+                    </select>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading delicious meals...</p>
+                </div>
+
+                <!-- Meals Grid -->
+                <div class="meals-grid" id="meals-grid">
+                    <!-- Meals will be populated by JavaScript -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <button class="pagination-btn prev" id="prev-btn" disabled>Previous</button>
+                    <div class="pagination-numbers" id="pagination-numbers">
+                        <!-- Page numbers will be populated by JavaScript -->
+                    </div>
+                    <button class="pagination-btn next" id="next-btn">Next</button>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -57,43 +85,85 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-column">
-                    <h3>Policies</h3>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                        <li><a href="#">Return Policy</a></li>
+                <!-- Policies -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-policies-title">Policies</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" id="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="#" id="footer-terms">Terms & Conditions</a></li>
+                        <li><a href="#" id="footer-returns">Return Policy</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h3>Contact & Support</h3>
-                    <ul>
-                        <li>+962 7 XXXX XXXX</li>
-                        <li>info@sama-restaurant.com</li>
-                        <li>Amman, Jordan</li>
+
+                <!-- Contact & Support -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-contact-title">Contact & Support</h3>
+                    <ul class="footer-links">
+                        <li id="footer-phone">📱 +962 7XXXXXXX</li>
+                        <li id="footer-email">📧 info@sama-restaurant.com</li>
+                        <li id="footer-location">📍 Amman, Jordan</li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h3>Follow Us</h3>
-                    <div class="social-icons">
-                        <a href="#" aria-label="Instagram">📷</a>
-                        <a href="#" aria-label="X">𝕏</a>
-                        <a href="#" aria-label="Facebook">📘</a>
+
+                <!-- Follow Us -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-social-title">Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link" id="footer-instagram" aria-label="Instagram">📷</a>
+                        <a href="#" class="social-link" id="footer-twitter" aria-label="Twitter">𝕏</a>
+                        <a href="#" class="social-link" id="footer-facebook" aria-label="Facebook">📘</a>
                     </div>
                 </div>
-                <div class="footer-column">
-                    <h3>Hours</h3>
-                    <ul>
-                        <li>Monday - Friday: 11:00 AM - 10:00 PM</li>
-                        <li>Saturday - Sunday: 12:00 PM - 11:00 PM</li>
+
+                <!-- Hours -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-hours-title">Hours</h3>
+                    <ul class="footer-hours" id="footer-hours-list">
+                        <li>Mon-Thu: 11:00 AM - 10:00 PM</li>
+                        <li>Fri-Sat: 11:00 AM - 11:00 PM</li>
+                        <li>Sunday: 12:00 PM - 9:00 PM</li>
                     </ul>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                <p>© 2026 Sama Restaurant. All rights reserved.</p>
+                <p id="footer-copyright">© 2026 Sama Restaurant. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
+    <!-- Meal Description Modal -->
+    <div class="modal" id="meal-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p class="modal-description" id="modal-description"></p>
+            <div class="modal-actions">
+                <span class="modal-price" id="modal-price"></span>
+                <button class="cta-btn modal-add-to-cart" id="modal-add-to-cart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <span class="toast-message" id="toast-message">Meal added to cart</span>
+            <button class="toast-close" id="toast-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Remove Item?</h2>
+            <p class="modal-description">Are you sure you want to remove this item from your cart?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancel-delete">Cancel</button>
+                <button class="btn-danger" id="confirm-delete">Remove</button>
+            </div>
+        </div>
+    </div>
 
     <script src="content.js"></script>
     <script src="script.js"></script>

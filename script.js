@@ -1,10 +1,33 @@
 // Sama Restaurant JavaScript
 class SamaRestaurant {
+  // Menu Page Functionality
   constructor() {
+    this.meals = [];
+    this.allMeals = [];
+    this.currentPage = 1;
+    this.mealsPerPage = 12;
+    this.currentCategory = 'all';
+    this.currentSort = 'default';
+    this.selectedMealForModal = null;
+    this.mealToDelete = null;
+    this.categories = [
+      { id: 'all', name: 'All', displayName: 'All' },
+      { id: 'chicken', name: 'chicken', displayName: 'Chicken' },
+      { id: 'beef', name: 'beef', displayName: 'Beef' },
+      { id: 'pasta', name: 'pasta', displayName: 'Pasta' },
+      { id: 'seafood', name: 'seafood', displayName: 'Seafood' },
+      { id: 'vegetarian', name: 'vegetarian', displayName: 'Vegetarian' },
+      { id: 'dessert', name: 'dessert', displayName: 'Dessert' },
+      { id: 'pizza', name: 'pizza', displayName: 'Pizza' },
+      { id: 'sandwiches', name: 'sandwich', displayName: 'Sandwiches' },
+      { id: 'breads', name: 'bread', displayName: 'Breads' },
+      { id: 'burgers', name: 'burger', displayName: 'Burgers' }
+    ];
+    
+    // Initialize from parent constructor
+    this.apiEndpoint = null; // Will be configured when API is ready
     this.cart = [];
     this.currentSlide = 0;
-    this.meals = [];
-    this.apiEndpoint = null; // Will be configured when API is ready
     this.init();
   }
 
@@ -14,6 +37,11 @@ class SamaRestaurant {
     this.updateCartUI();
     this.initializeSlider();
     this.loadContent(); // Add content loading
+    
+    // Initialize menu page if on menu.html
+    if (window.location.pathname.includes('menu.html')) {
+      this.initializeMenuPage();
+    }
   }
 
   // Theme Management
@@ -157,21 +185,22 @@ class SamaRestaurant {
   }
 
   renderSlider() {
-  console.log('renderSlider called, meals:', this.meals);
-console.log('Image URLs:', JSON.stringify(this.meals.map(m => m.image), null, 2));  const slider = document.querySelector('.slider');
-  if (!slider || this.meals.length === 0) return;
+    console.log('renderSlider called, meals:', this.meals);
+    console.log('Image URLs:', JSON.stringify(this.meals.map(m => m.image), null, 2));
+    const slider = document.querySelector('.slider');
+    if (!slider || this.meals.length === 0) return;
 
     slider.innerHTML = this.meals.map(meal => `
-  <div class="meal-slide">
-    <img src="${meal.image}" alt="${meal.name}" class="meal-image">
-    <h3 class="meal-name">${meal.name}</h3>
-    <div class="meal-prices">
-      <span class="meal-price">$${meal.price}</span>
-      <span class="meal-price-before">$${meal.priceBefore}</span>
-    </div>
-    <button class="cta-btn" onclick="restaurant.addToCart(${JSON.stringify(meal).replace(/"/g, '&quot;')})">Add to Cart</button>
-  </div>
-`).join('');
+      <div class="meal-slide">
+        <img src="${meal.image}" alt="${meal.name}" class="meal-image">
+        <h3 class="meal-name">${meal.name}</h3>
+        <div class="meal-prices">
+          <span class="meal-price">$${meal.price}</span>
+          <span class="meal-price-before">$${meal.priceBefore}</span>
+        </div>
+        <button class="cta-btn" onclick="restaurant.addToCart(${JSON.stringify(meal).replace(/"/g, '&quot;')})">Add to Cart</button>
+      </div>
+    `).join('');
 
     this.updateSliderPosition();
   }
@@ -357,6 +386,475 @@ console.log('Image URLs:', JSON.stringify(this.meals.map(m => m.image), null, 2)
       console.log('Content loaded successfully');
     } catch (error) {
       console.error('Error loading content:', error);
+    }
+  }
+
+  // Menu Page Methods
+  async initializeMenuPage() {
+    console.log('Initializing menu page...');
+    await this.loadMenuMeals();
+    this.renderCategories();
+    this.setupMenuEventListeners();
+    this.hideLoadingState();
+  }
+
+  async loadMenuMeals() {
+    this.showLoadingState();
+    
+    try {
+      // Load meals from all categories
+      const categoryPromises = this.categories
+        .filter(cat => cat.id !== 'all')
+        .map(category => this.loadMealsFromCategory(category.name));
+      
+      const categoryResults = await Promise.all(categoryPromises);
+      this.allMeals = categoryResults.flat();
+      
+      // Add unique IDs and ensure all required fields
+      this.allMeals = this.allMeals.map((meal, index) => ({
+        id: meal.idMeal || index + 1,
+        name: meal.strMeal || 'Unknown Meal',
+        description: meal.strInstructions || 'Delicious meal prepared with fresh ingredients.',
+        image: meal.strMealThumb || 'https://picsum.photos/seed/meal/400/300',
+        price: this.generateRandomPrice(),
+        category: this.getMealCategory(meal)
+      }));
+      
+      // Sort and filter meals
+      this.filterAndSortMeals();
+      this.renderMeals();
+      this.renderPagination();
+      
+    } catch (error) {
+      console.error('Error loading menu meals:', error);
+      this.loadFallbackMeals();
+    }
+  }
+
+  async loadMealsFromCategory(category) {
+    try {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+      const data = await response.json();
+      return data.meals || [];
+    } catch (error) {
+      console.error(`Error loading ${category} meals:`, error);
+      return [];
+    }
+  }
+
+  getMealCategory(meal) {
+    // Try to determine category from meal data
+    const categories = ['chicken', 'beef', 'pasta', 'seafood', 'vegetarian', 'dessert', 'pizza', 'sandwich', 'bread', 'burger'];
+    const mealName = (meal.strMeal || '').toLowerCase();
+    
+    for (const category of categories) {
+      if (mealName.includes(category)) {
+        return category;
+      }
+    }
+    
+    return 'other';
+  }
+
+  generateRandomPrice() {
+    return (Math.random() * 25 + 8).toFixed(2);
+  }
+
+  loadFallbackMeals() {
+    // Fallback meals if API fails
+    this.allMeals = [
+      { id: 1, name: 'Grilled Chicken', description: 'Tender grilled chicken with herbs', image: 'https://picsum.photos/seed/chicken/400/300', price: '12.99', category: 'chicken' },
+      { id: 2, name: 'Beef Burger', description: 'Juicy beef burger with fresh vegetables', image: 'https://picsum.photos/seed/burger/400/300', price: '10.99', category: 'burgers' },
+      { id: 3, name: 'Pasta Carbonara', description: 'Creamy pasta with bacon and parmesan', image: 'https://picsum.photos/seed/pasta/400/300', price: '11.99', category: 'pasta' },
+      // Add more fallback meals as needed
+    ];
+    
+    this.filterAndSortMeals();
+    this.renderMeals();
+    this.renderPagination();
+  }
+
+  renderCategories() {
+    const categoriesGrid = document.getElementById('categories-grid');
+    if (!categoriesGrid) return;
+    
+    categoriesGrid.innerHTML = this.categories.map(category => `
+      <button class="category-btn ${category.id === this.currentCategory ? 'active' : ''}" 
+              data-category="${category.id}">
+        ${category.displayName}
+      </button>
+    `).join('');
+  }
+
+  setupMenuEventListeners() {
+    // Category buttons - use event delegation for dynamic content
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-btn')) {
+        this.currentCategory = e.target.dataset.category;
+        this.currentPage = 1;
+        this.filterAndSortMeals();
+        this.renderMeals();
+        this.renderPagination();
+        this.renderCategories();
+      }
+    });
+
+    // Sort dropdown
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (e) => {
+        this.currentSort = e.target.value;
+        this.filterAndSortMeals();
+        this.renderMeals();
+      });
+    }
+
+    // Modal close buttons
+    const modalClose = document.getElementById('modal-close');
+    if (modalClose) {
+      modalClose.addEventListener('click', () => this.closeMealModal());
+    }
+
+    // Toast close button
+    const toastClose = document.getElementById('toast-close');
+    if (toastClose) {
+      toastClose.addEventListener('click', () => this.hideToast());
+    }
+
+    // Delete confirmation modal
+    const cancelDelete = document.getElementById('cancel-delete');
+    const confirmDelete = document.getElementById('confirm-delete');
+    
+    if (cancelDelete) {
+      cancelDelete.addEventListener('click', () => this.closeDeleteModal());
+    }
+    
+    if (confirmDelete) {
+      confirmDelete.addEventListener('click', () => this.confirmDeleteMeal());
+    }
+
+    // Modal backdrop click
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+  }
+
+  filterAndSortMeals() {
+    // Filter by category
+    this.meals = this.currentCategory === 'all' 
+      ? [...this.allMeals]
+      : this.allMeals.filter(meal => meal.category === this.currentCategory);
+    
+    // Sort meals
+    switch (this.currentSort) {
+      case 'low-to-high':
+        this.meals.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        break;
+      case 'high-to-low':
+        this.meals.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        break;
+      default:
+        // Keep original order
+        break;
+    }
+  }
+
+  renderMeals() {
+    const mealsGrid = document.getElementById('meals-grid');
+    if (!mealsGrid) return;
+    
+    const startIndex = (this.currentPage - 1) * this.mealsPerPage;
+    const endIndex = startIndex + this.mealsPerPage;
+    const pageMeals = this.meals.slice(startIndex, endIndex);
+    
+    if (pageMeals.length === 0) {
+      mealsGrid.innerHTML = '<p class="no-meals">No meals found in this category.</p>';
+      return;
+    }
+    
+    mealsGrid.innerHTML = pageMeals.map(meal => this.createMealCard(meal)).join('');
+    
+    // Add event listeners to meal cards
+    this.attachMealCardListeners();
+  }
+
+  createMealCard(meal) {
+    const cartItem = this.cart.find(item => item.id === meal.id);
+    const quantity = cartItem ? cartItem.quantity : 0;
+    
+    return `
+      <div class="meal-card" data-meal-id="${meal.id}">
+        <img src="${meal.image}" alt="${meal.name}" class="meal-image">
+        <div class="meal-content">
+          <h3 class="meal-name">${meal.name}</h3>
+          <p class="meal-price">$${meal.price}</p>
+          <p class="meal-description expandable" data-meal-id="${meal.id}">
+            ${this.truncateDescription(meal.description)}
+          </p>
+          ${quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal)}
+        </div>
+      </div>
+    `;
+  }
+
+  truncateDescription(description) {
+    if (!description) return 'Delicious meal prepared with fresh ingredients.';
+    
+    const words = description.split(' ');
+    if (words.length <= 15) return description;
+    
+    return words.slice(0, 15).join(' ') + '...';
+  }
+
+  createAddToCartButton(meal) {
+    return `
+      <button class="add-to-cart-btn" data-meal-id="${meal.id}">
+        Add to Cart
+      </button>
+    `;
+  }
+
+  createMealCounter(meal, quantity) {
+    return `
+      <div class="meal-counter">
+        <button class="counter-btn decrement" data-meal-id="${meal.id}">-</button>
+        <span class="counter-value">${quantity}</span>
+        <button class="counter-btn increment" data-meal-id="${meal.id}">+</button>
+      </div>
+    `;
+  }
+
+  attachMealCardListeners() {
+    // Use event delegation for dynamically created elements
+    document.addEventListener('click', (e) => {
+      // Description click for modal
+      if (e.target.classList.contains('meal-description') && e.target.classList.contains('expandable')) {
+        const mealId = parseInt(e.target.dataset.mealId);
+        this.showMealModal(mealId);
+      }
+      
+      // Add to cart buttons
+      if (e.target.classList.contains('add-to-cart-btn')) {
+        const mealId = parseInt(e.target.dataset.mealId);
+        this.addToCart(mealId);
+      }
+      
+      // Counter buttons
+      if (e.target.classList.contains('counter-btn')) {
+        const mealId = parseInt(e.target.dataset.mealId);
+        const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
+        this.updateCartItemQuantity(mealId, action);
+      }
+    });
+  }
+
+  showMealModal(mealId) {
+    const meal = this.allMeals.find(m => m.id === mealId);
+    if (!meal) return;
+    
+    this.selectedMealForModal = meal;
+    
+    const modal = document.getElementById('meal-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+    const modalPrice = document.getElementById('modal-price');
+    const modalAddToCart = document.getElementById('modal-add-to-cart');
+    
+    if (modal && modalTitle && modalDescription && modalPrice && modalAddToCart) {
+      modalTitle.textContent = meal.name;
+      modalDescription.textContent = meal.description;
+      modalPrice.textContent = `$${meal.price}`;
+      
+      // Check if item is already in cart
+      const cartItem = this.cart.find(item => item.id === mealId);
+      modalAddToCart.textContent = cartItem ? 'Update Cart' : 'Add to Cart';
+      
+      modal.classList.add('active');
+    }
+  }
+
+  closeMealModal() {
+    const modal = document.getElementById('meal-modal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+    this.selectedMealForModal = null;
+  }
+
+  renderPagination() {
+    const paginationNumbers = document.getElementById('pagination-numbers');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    if (!paginationNumbers || !prevBtn || !nextBtn) return;
+    
+    // Limit to maximum 5 pages
+    const totalPages = Math.min(Math.ceil(this.meals.length / this.mealsPerPage), 5);
+    
+    // Render page numbers
+    paginationNumbers.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `page-number ${i === this.currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', () => this.goToPage(i));
+      paginationNumbers.appendChild(pageBtn);
+    }
+    
+    // Update prev/next buttons
+    prevBtn.disabled = this.currentPage === 1;
+    nextBtn.disabled = this.currentPage === totalPages;
+    
+    // Remove existing listeners and add new ones
+    const newPrevBtn = prevBtn.cloneNode(true);
+    const newNextBtn = nextBtn.cloneNode(true);
+    prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    
+    newPrevBtn.addEventListener('click', () => this.previousPage());
+    newNextBtn.addEventListener('click', () => this.nextPage());
+  }
+
+  goToPage(page) {
+    this.currentPage = page;
+    this.renderMeals();
+    this.renderPagination();
+  }
+
+  nextPage() {
+    const totalPages = Math.min(Math.ceil(this.meals.length / this.mealsPerPage), 5);
+    if (this.currentPage < totalPages) {
+      this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  updateCartItemQuantity(mealId, action) {
+    const meal = this.allMeals.find(m => m.id === mealId);
+    if (!meal) return;
+    
+    const cartItem = this.cart.find(item => item.id === mealId);
+    
+    if (action === 'increment') {
+      if (cartItem) {
+        cartItem.quantity++;
+      } else {
+        this.addToCart(mealId);
+      }
+    } else {
+      if (cartItem) {
+        cartItem.quantity--;
+        if (cartItem.quantity === 0) {
+          this.mealToDelete = cartItem;
+          this.showDeleteModal();
+        } else {
+          this.updateCartUI();
+          this.renderMeals();
+        }
+      }
+    }
+  }
+
+  showDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    if (modal) {
+      modal.classList.add('active');
+    }
+  }
+
+  closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+    this.mealToDelete = null;
+  }
+
+  confirmDeleteMeal() {
+    if (this.mealToDelete) {
+      this.removeFromCart(this.mealToDelete.id);
+      this.closeDeleteModal();
+    }
+  }
+
+  showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    
+    if (toast && toastMessage) {
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        this.hideToast();
+      }, 3000);
+    }
+  }
+
+  hideToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+      toast.classList.remove('show');
+    }
+  }
+
+  showLoadingState() {
+    const loadingState = document.getElementById('loading-state');
+    if (loadingState) {
+      loadingState.classList.add('active');
+    }
+  }
+
+  hideLoadingState() {
+    const loadingState = document.getElementById('loading-state');
+    if (loadingState) {
+      loadingState.classList.remove('active');
+    }
+  }
+
+  // Enhanced addToCart for menu page
+  addToCart(mealId) {
+    // Handle both meal object and mealId
+    let meal;
+    if (typeof mealId === 'object') {
+      meal = mealId;
+    } else {
+      meal = this.allMeals.find(m => m.id === mealId) || this.meals.find(m => m.id === mealId);
+    }
+    
+    if (!meal) return;
+    
+    const existingItem = this.cart.find(item => item.id === meal.id);
+    
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      this.cart.push({
+        id: meal.id,
+        name: meal.name,
+        price: parseFloat(meal.price),
+        quantity: 1,
+        image: meal.image
+      });
+    }
+    
+    this.updateCartUI();
+    this.renderMeals();
+    this.showToast('Meal added to cart');
+    
+    // Close modal if open
+    if (this.selectedMealForModal && this.selectedMealForModal.id === meal.id) {
+      this.closeMealModal();
     }
   }
 
