@@ -11,6 +11,9 @@ class SamaRestaurant {
     this.currentSort = 'default';
     this.selectedMealForModal = null;
     this.mealToDelete = null;
+    
+    // Load cart from localStorage on initialization
+    this.loadCartFromStorage();
     this.categories = [
   { id: 'all', name: 'all', displayName: 'All' },
   { id: 'chicken', name: 'Chicken', displayName: 'Chicken' },
@@ -26,6 +29,27 @@ class SamaRestaurant {
     this.cart = [];
     this.currentSlide = 0;
     this.init();
+  }
+
+  // Cart Persistence Methods
+  loadCartFromStorage() {
+    try {
+      const savedCart = localStorage.getItem('samaRestaurantCart');
+      if (savedCart) {
+        this.cart = JSON.parse(savedCart);
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      this.cart = [];
+    }
+  }
+
+  saveCartToStorage() {
+    try {
+      localStorage.setItem('samaRestaurantCart', JSON.stringify(this.cart));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
   }
 
   init() {
@@ -49,10 +73,32 @@ class SamaRestaurant {
       themeToggle.addEventListener('click', () => this.toggleTheme());
     }
 
-    // Cart functionality
+    // Cart button
     const cartBtn = document.querySelector('.cart-btn');
     if (cartBtn) {
-      cartBtn.addEventListener('click', () => this.toggleCart());
+      cartBtn.addEventListener('click', () => this.showCartModal());
+    }
+
+    // Cart modal close
+    const cartClose = document.getElementById('cart-close');
+    if (cartClose) {
+      cartClose.addEventListener('click', () => this.hideCartModal());
+    }
+
+    // Checkout button
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => this.checkout());
+    }
+
+    // Cart modal backdrop click
+    const cartModal = document.getElementById('cart-modal');
+    if (cartModal) {
+      cartModal.addEventListener('click', (e) => {
+        if (e.target === cartModal) {
+          this.hideCartModal();
+        }
+      });
     }
 
     // Slider controls
@@ -106,12 +152,14 @@ class SamaRestaurant {
     }
     
     this.updateCartUI();
+    this.saveCartToStorage();
     this.showNotification(`${meal.name} added to cart!`);
   }
 
   removeFromCart(mealId) {
     this.cart = this.cart.filter(item => item.id !== mealId);
     this.updateCartUI();
+    this.saveCartToStorage();
   }
 
   updateCartUI() {
@@ -120,6 +168,7 @@ class SamaRestaurant {
       const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
       cartCount.textContent = totalItems;
     }
+    this.saveCartToStorage();
   }
 
   // Slider Functionality
@@ -760,6 +809,13 @@ class SamaRestaurant {
         }
       }
     }
+    
+    // Update cart modal if it's open
+    const cartModal = document.getElementById('cart-modal');
+    if (cartModal && cartModal.classList.contains('active')) {
+      this.renderCartItems();
+      this.updateCartSummary();
+    }
   }
 
   showDeleteModal() {
@@ -879,6 +935,142 @@ updateMealCard(mealId) {
     buttonContainer.outerHTML = quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal);
   }
 }
+
+// Cart Modal Methods
+showCartModal() {
+  const modal = document.getElementById('cart-modal');
+  if (modal) {
+    modal.classList.add('active');
+    this.renderCartItems();
+    this.updateCartSummary();
+  }
+}
+
+hideCartModal() {
+  const modal = document.getElementById('cart-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+renderCartItems() {
+  const cartItemsContainer = document.getElementById('cart-items');
+  if (!cartItemsContainer) return;
+
+  if (this.cart.length === 0) {
+    cartItemsContainer.innerHTML = `
+      <div class="empty-cart">
+        <h3>Your cart is empty</h3>
+        <p>Add some delicious meals to get started!</p>
+        <button class="cta-btn" onclick="restaurant.hideCartModal(); window.location.href='menu.html'">
+          Browse Menu
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  cartItemsContainer.innerHTML = this.cart.map(item => `
+    <div class="cart-item" data-item-id="${item.id}">
+      <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+      <div class="cart-item-details">
+        <h4 class="cart-item-name">${item.name}</h4>
+        <p class="cart-item-price">$${item.price.toFixed(2)} each</p>
+      </div>
+      <div class="cart-item-controls">
+        <div class="cart-counter">
+          <button class="cart-counter-btn decrement" data-item-id="${item.id}">−</button>
+          <span class="cart-counter-value">${item.quantity}</span>
+          <button class="cart-counter-btn increment" data-item-id="${item.id}">+</button>
+        </div>
+        <div class="cart-item-total">$${(item.price * item.quantity).toFixed(2)}</div>
+        <button class="remove-item" data-item-id="${item.id}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  this.attachCartEventListeners();
+}
+
+attachCartEventListeners() {
+  // Use event delegation for dynamically created cart buttons
+  document.addEventListener('click', (e) => {
+    // Cart counter buttons
+    if (e.target.classList.contains('cart-counter-btn')) {
+      e.preventDefault();
+      const itemId = e.target.dataset.itemId;
+      const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
+      this.updateCartItemQuantity(itemId, action);
+    }
+    
+    // Remove item buttons
+    if (e.target.classList.contains('remove-item')) {
+      e.preventDefault();
+      const itemId = e.target.dataset.itemId;
+      this.removeFromCart(itemId);
+      this.renderCartItems();
+      this.updateCartSummary();
+    }
+  });
+}
+
+updateCartSummary() {
+  const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const tax = subtotal * 0.1;
+  const delivery = this.cart.length > 0 ? 5.00 : 0;
+  const total = subtotal + tax + delivery;
+
+  const subtotalElement = document.getElementById('cart-subtotal');
+  const taxElement = document.getElementById('cart-tax');
+  const deliveryElement = document.getElementById('cart-delivery');
+  const totalElement = document.getElementById('cart-total');
+
+  if (subtotalElement) subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+  if (taxElement) taxElement.textContent = `$${tax.toFixed(2)}`;
+  if (deliveryElement) deliveryElement.textContent = `$${delivery.toFixed(2)}`;
+  if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
+}
+
+removeFromCart(itemId) {
+  this.cart = this.cart.filter(item => item.id !== itemId);
+  this.updateCartUI();
+  this.renderCartItems();
+  this.updateCartSummary();
+  this.showToast('Item removed from cart');
+}
+
+checkout() {
+  if (this.cart.length === 0) {
+    this.showToast('Your cart is empty');
+    return;
+  }
+
+  const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const tax = subtotal * 0.1;
+  const delivery = 5.00;
+  const total = subtotal + tax + delivery;
+
+  const orderSummary = {
+    items: this.cart,
+    subtotal: subtotal,
+    tax: tax,
+    delivery: delivery,
+    total: total,
+    timestamp: new Date().toISOString()
+  };
+
+  localStorage.setItem('currentOrder', JSON.stringify(orderSummary));
+  this.cart = [];
+  this.updateCartUI();
+  this.saveCartToStorage();
+  this.hideCartModal();
+  this.showToast('Order placed successfully!');
+
+  setTimeout(() => {
+    alert(`Order placed successfully!\n\nOrder Total: $${total.toFixed(2)}\n\nThank you for your order!`);
+  }, 1000);
+}
+
   // Navigation
   navigateToPage(page) {
     window.location.href = page;
