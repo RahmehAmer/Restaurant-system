@@ -395,6 +395,7 @@ class SamaRestaurant {
     await this.loadMenuMeals();
     this.renderCategories();
     this.setupMenuEventListeners();
+    this.attachMealCardListeners();
     this.hideLoadingState();
   }
 
@@ -419,6 +420,7 @@ class SamaRestaurant {
         price: this.generateRandomPrice(),
         category: this.getMealCategory(meal)
       }));
+      console.log('Sample meal IDs:', this.allMeals.slice(0, 5).map(m => ({ id: m.id, name: m.name })));
       
       // Sort and filter meals
       this.filterAndSortMeals();
@@ -579,7 +581,6 @@ class SamaRestaurant {
     mealsGrid.innerHTML = pageMeals.map(meal => this.createMealCard(meal)).join('');
     
     // Add event listeners to meal cards
-    this.attachMealCardListeners();
   }
 
   createMealCard(meal) {
@@ -629,28 +630,34 @@ class SamaRestaurant {
   }
 
   attachMealCardListeners() {
-    // Use event delegation for dynamically created elements
-    document.addEventListener('click', (e) => {
-      // Description click for modal
-      if (e.target.classList.contains('meal-description') && e.target.classList.contains('expandable')) {
-        const mealId = parseInt(e.target.dataset.mealId);
-        this.showMealModal(mealId);
-      }
-      
-      // Add to cart buttons
-      if (e.target.classList.contains('add-to-cart-btn')) {
-        const mealId = parseInt(e.target.dataset.mealId);
-        this.addToCart(mealId);
-      }
-      
-      // Counter buttons
-      if (e.target.classList.contains('counter-btn')) {
-        const mealId = parseInt(e.target.dataset.mealId);
-        const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
-        this.updateCartItemQuantity(mealId, action);
-      }
-    });
-  }
+  // Use event delegation for dynamically created elements
+  document.addEventListener('click', (e) => {
+    console.log('Click detected on:', e.target.classList.toString());
+    
+    // Description click for modal
+    if (e.target.classList.contains('meal-description') && e.target.classList.contains('expandable')) {
+      const mealId = parseInt(e.target.dataset.mealId);
+      console.log('Description clicked, mealId:', mealId);
+      this.showMealModal(mealId);
+    }
+    
+    // Add to cart buttons
+    if (e.target.classList.contains('add-to-cart-btn')) {
+      console.log('Add to cart button clicked!');
+      console.log('Dataset:', e.target.dataset);
+      const mealId = parseInt(e.target.dataset.mealId);
+      console.log('Extracted mealId:', mealId);
+      this.addToCart(mealId);
+    }
+    
+    // Counter buttons
+    if (e.target.classList.contains('counter-btn')) {
+      const mealId = e.target.dataset.mealId;
+      const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
+      this.updateCartItemQuantity(mealId, action);
+    }
+  });
+}
 
   showMealModal(mealId) {
     const meal = this.allMeals.find(m => m.id === mealId);
@@ -739,18 +746,20 @@ class SamaRestaurant {
   }
 
   updateCartItemQuantity(mealId, action) {
-    const meal = this.allMeals.find(m => m.id === mealId);
+    const meal = this.allMeals.find(m => m.id === mealId.toString());
     if (!meal) return;
     
-    const cartItem = this.cart.find(item => item.id === mealId);
-    
+    const cartItem = this.cart.find(item => item.id === mealId.toString());
     if (action === 'increment') {
-      if (cartItem) {
-        cartItem.quantity++;
-      } else {
-        this.addToCart(mealId);
-      }
-    } else {
+  if (cartItem) {
+    cartItem.quantity++;
+    this.updateCartUI();
+    this.updateMealCard(mealId);
+  } else {
+    this.addToCart(mealId);
+  }
+}
+    else {
       if (cartItem) {
         cartItem.quantity--;
         if (cartItem.quantity === 0) {
@@ -758,7 +767,7 @@ class SamaRestaurant {
           this.showDeleteModal();
         } else {
           this.updateCartUI();
-          this.renderMeals();
+          this.updateMealCard(mealId);
         }
       }
     }
@@ -823,41 +832,64 @@ class SamaRestaurant {
   }
 
   // Enhanced addToCart for menu page
-  addToCart(mealId) {
-    // Handle both meal object and mealId
-    let meal;
-    if (typeof mealId === 'object') {
-      meal = mealId;
-    } else {
-      meal = this.allMeals.find(m => m.id === mealId) || this.meals.find(m => m.id === mealId);
-    }
-    
-    if (!meal) return;
-    
-    const existingItem = this.cart.find(item => item.id === meal.id);
-    
-    if (existingItem) {
-      existingItem.quantity++;
-    } else {
-      this.cart.push({
-        id: meal.id,
-        name: meal.name,
-        price: parseFloat(meal.price),
-        quantity: 1,
-        image: meal.image
-      });
-    }
-    
-    this.updateCartUI();
-    this.renderMeals();
-    this.showToast('Meal added to cart');
-    
-    // Close modal if open
-    if (this.selectedMealForModal && this.selectedMealForModal.id === meal.id) {
-      this.closeMealModal();
-    }
+addToCart(mealId) {
+  console.log('addToCart called with mealId:', mealId);
+  console.log('allMeals length:', this.allMeals.length);
+  console.log('meals length:', this.meals.length);
+  
+  // Handle both meal object and mealId
+  let meal;
+  if (typeof mealId === 'object') {
+    meal = mealId;
+  } else {
+    meal = this.allMeals.find(m => m.id === mealId.toString()) || this.meals.find(m => m.id === mealId.toString());
   }
-
+  
+  console.log('Found meal:', meal);
+  
+  if (!meal) {
+    console.log('Meal not found, returning');
+    return;
+  }
+  
+  const existingItem = this.cart.find(item => item.id === meal.id);
+  
+  if (existingItem) {
+    existingItem.quantity++;
+  } else {
+    this.cart.push({
+      id: meal.id,
+      name: meal.name,
+      price: parseFloat(meal.price),
+      quantity: 1,
+      image: meal.image
+    });
+  }
+  
+  console.log('Cart after adding:', this.cart);
+  this.updateCartUI();
+  this.showToast('Meal added to cart');
+  this.updateMealCard(mealId);
+  // Close modal if open
+  if (this.selectedMealForModal && this.selectedMealForModal.id === meal.id) {
+    this.closeMealModal();
+  }
+}
+updateMealCard(mealId) {
+  const mealCard = document.querySelector(`[data-meal-id="${mealId}"]`);
+  if (!mealCard) return;
+  
+  const meal = this.allMeals.find(m => m.id === mealId.toString());
+  if (!meal) return;
+  
+  const cartItem = this.cart.find(item => item.id === mealId.toString());
+  const quantity = cartItem ? cartItem.quantity : 0;
+  
+  const buttonContainer = mealCard.querySelector('.meal-content').lastElementChild;
+  if (buttonContainer) {
+    buttonContainer.outerHTML = quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal);
+  }
+}
   // Navigation
   navigateToPage(page) {
     window.location.href = page;
