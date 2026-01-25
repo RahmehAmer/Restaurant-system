@@ -57,7 +57,7 @@ const content = {
     },
     contact: {
       title: "Contact & Support",
-      phone: "+962 7 XXXX XXXX",
+      phone: "+96276421391",
       email: "info@sama-restaurant.com",
       location: "Amman, Jordan"
     },

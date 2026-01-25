@@ -355,7 +355,7 @@ main {
 
 /* Menu Page Styles */
 .menu-section {
-  padding: 4rem 0;
+  padding: 2rem 0;  /* Changed from 4rem 0 */
 }
 
 .categories-container {
@@ -390,8 +390,8 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 2rem;
-  justify-content: flex-end;
+  justify-content: flex-start;  /* Changed from flex-end */
+   padding: 2rem 0;
 }
 
 .sort-label {
@@ -476,6 +476,9 @@ main {
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .meal-price {
@@ -527,7 +530,47 @@ main {
 .add-to-cart-btn:hover {
   background: var(--primary-dark);
 }
+.add-to-cart-btn:hover {
+  background: var(--primary-dark);
+}
 
+/* Consistent CTA Button Sizes */
+.add-to-cart-btn,
+.meal-counter {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition);
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.meal-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  height: 48px !important;
+  box-sizing: border-box;
+}
 .meal-counter {
   display: flex;
   align-items: center;
@@ -551,10 +594,30 @@ main {
   align-items: center;
   justify-content: center;
   transition: var(--transition);
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.counter-btn:hover {
-  background: var(--primary-dark);
+
+/* Create + and - symbols with pseudo-elements */
+.counter-btn.decrement::before {
+  content: "−";
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.counter-btn.increment::before {
+  content: "+";
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Ensure symbols stay visible on hover */
+.counter-btn:hover::before {
+  color: white;
 }
 
 .counter-value {
@@ -708,15 +771,15 @@ main {
 /* Toast Notification */
 .toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  bottom: 20px;  /* Changed from top: 20px */
+  right: 20px;    /* Changed from right: 20px */
   background: var(--primary-color);
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 8px;
   box-shadow: var(--shadow-md);
   z-index: 1001;
-  transform: translateX(100%);
+  transform: translateX(120%);
   transition: transform 0.3s ease;
 }
 

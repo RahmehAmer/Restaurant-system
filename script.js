@@ -3,6 +3,7 @@ class SamaRestaurant {
   // Menu Page Functionality
   constructor() {
     this.meals = [];
+    this.sliderMeals = [];
     this.allMeals = [];
     this.currentPage = 1;
     this.mealsPerPage = 12;
@@ -11,18 +12,14 @@ class SamaRestaurant {
     this.selectedMealForModal = null;
     this.mealToDelete = null;
     this.categories = [
-      { id: 'all', name: 'All', displayName: 'All' },
-      { id: 'chicken', name: 'chicken', displayName: 'Chicken' },
-      { id: 'beef', name: 'beef', displayName: 'Beef' },
-      { id: 'pasta', name: 'pasta', displayName: 'Pasta' },
-      { id: 'seafood', name: 'seafood', displayName: 'Seafood' },
-      { id: 'vegetarian', name: 'vegetarian', displayName: 'Vegetarian' },
-      { id: 'dessert', name: 'dessert', displayName: 'Dessert' },
-      { id: 'pizza', name: 'pizza', displayName: 'Pizza' },
-      { id: 'sandwiches', name: 'sandwich', displayName: 'Sandwiches' },
-      { id: 'breads', name: 'bread', displayName: 'Breads' },
-      { id: 'burgers', name: 'burger', displayName: 'Burgers' }
-    ];
+  { id: 'all', name: 'all', displayName: 'All' },
+  { id: 'chicken', name: 'Chicken', displayName: 'Chicken' },
+  { id: 'beef', name: 'Beef', displayName: 'Beef' },
+  { id: 'pasta', name: 'Pasta', displayName: 'Pasta' },
+  { id: 'seafood', name: 'Seafood', displayName: 'Seafood' },
+  { id: 'vegetarian', name: 'Vegetarian', displayName: 'Vegetarian' },
+  { id: 'pizza', name: 'Pizza', displayName: 'Pizza' },
+];
     
     // Initialize from parent constructor
     this.apiEndpoint = null; // Will be configured when API is ready
@@ -127,11 +124,12 @@ class SamaRestaurant {
 
   // Slider Functionality
   async initializeSlider() {
-    // Try to load meals from API if available
-    if (this.apiEndpoint) {
-      await this.loadMealsFromAPI();
-    } else {
-      // Use placeholder data for demo
+    // Always try to load meals from API for the slider
+    await this.loadMealsFromAPI();
+    
+    // If API fails, use placeholder data
+    if (this.sliderMeals.length === 0) {
+      this.loadPlaceholderMeals();
     }
     
     this.renderSlider();
@@ -143,23 +141,23 @@ class SamaRestaurant {
     const response = await fetch('https://www.themealdb.com/api/json/v1/1/search.php?s=chicken');
     const data = await response.json();
     
-    this.meals = data.meals.slice(0, 3).map((meal, index) => ({
+    this.sliderMeals = data.meals.slice(0, 3).map((meal, index) => ({
       id: index + 1,
       name: meal.strMeal,
       image: meal.strMealThumb,
-      price: (Math.random() * 20 + 10).toFixed(2),
-      priceBefore: (Math.random() * 10 + 25).toFixed(2)
+      price: this.generateRandomPrice(),
+      priceBefore: this.generateRandomPrice() * 1.5
     }));
     
   } catch (error) {
     console.error('Error loading meals from API:', error);
-    this.meals = [];
+    this.sliderMeals = [];
   }
 }
 
   loadPlaceholderMeals() {
     // Placeholder meals for demo when API is not available
-    this.meals = [
+    this.sliderMeals = [
       {
         id: 1,
         name: "Grilled Chicken Platter",
@@ -185,12 +183,10 @@ class SamaRestaurant {
   }
 
   renderSlider() {
-    console.log('renderSlider called, meals:', this.meals);
-    console.log('Image URLs:', JSON.stringify(this.meals.map(m => m.image), null, 2));
     const slider = document.querySelector('.slider');
-    if (!slider || this.meals.length === 0) return;
+    if (!slider || this.sliderMeals.length === 0) return;
 
-    slider.innerHTML = this.meals.map(meal => `
+    slider.innerHTML = this.sliderMeals.map(meal => `
       <div class="meal-slide">
         <img src="${meal.image}" alt="${meal.name}" class="meal-image">
         <h3 class="meal-name">${meal.name}</h3>
@@ -213,14 +209,14 @@ class SamaRestaurant {
   }
 
   nextSlide() {
-    if (this.meals.length === 0) return;
-    this.currentSlide = (this.currentSlide + 1) % this.meals.length;
+    if (this.sliderMeals.length === 0) return;
+    this.currentSlide = (this.currentSlide + 1) % this.sliderMeals.length;
     this.updateSliderPosition();
   }
 
   prevSlide() {
-    if (this.meals.length === 0) return;
-    this.currentSlide = (this.currentSlide - 1 + this.meals.length) % this.meals.length;
+    if (this.sliderMeals.length === 0) return;
+    this.currentSlide = (this.currentSlide - 1 + this.sliderMeals.length) % this.sliderMeals.length;
     this.updateSliderPosition();
   }
 
@@ -579,8 +575,6 @@ class SamaRestaurant {
     }
     
     mealsGrid.innerHTML = pageMeals.map(meal => this.createMealCard(meal)).join('');
-    
-    // Add event listeners to meal cards
   }
 
   createMealCard(meal) {
@@ -622,9 +616,9 @@ class SamaRestaurant {
   createMealCounter(meal, quantity) {
     return `
       <div class="meal-counter">
-        <button class="counter-btn decrement" data-meal-id="${meal.id}">-</button>
+        <button class="counter-btn decrement" data-meal-id="${meal.id}"></button>
         <span class="counter-value">${quantity}</span>
-        <button class="counter-btn increment" data-meal-id="${meal.id}">+</button>
+        <button class="counter-btn increment" data-meal-id="${meal.id}"></button>
       </div>
     `;
   }
@@ -632,21 +626,15 @@ class SamaRestaurant {
   attachMealCardListeners() {
   // Use event delegation for dynamically created elements
   document.addEventListener('click', (e) => {
-    console.log('Click detected on:', e.target.classList.toString());
-    
     // Description click for modal
     if (e.target.classList.contains('meal-description') && e.target.classList.contains('expandable')) {
       const mealId = parseInt(e.target.dataset.mealId);
-      console.log('Description clicked, mealId:', mealId);
       this.showMealModal(mealId);
     }
     
     // Add to cart buttons
     if (e.target.classList.contains('add-to-cart-btn')) {
-      console.log('Add to cart button clicked!');
-      console.log('Dataset:', e.target.dataset);
       const mealId = parseInt(e.target.dataset.mealId);
-      console.log('Extracted mealId:', mealId);
       this.addToCart(mealId);
     }
     
@@ -763,6 +751,7 @@ class SamaRestaurant {
       if (cartItem) {
         cartItem.quantity--;
         if (cartItem.quantity === 0) {
+        this.updateMealCard(mealId);
           this.mealToDelete = cartItem;
           this.showDeleteModal();
         } else {
