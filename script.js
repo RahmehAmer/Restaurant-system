@@ -12,8 +12,12 @@ class SamaRestaurant {
     this.selectedMealForModal = null;
     this.mealToDelete = null;
     
+    // Initialize cart first
+    this.cart = [];
+    
     // Load cart from localStorage on initialization
     this.loadCartFromStorage();
+    
     this.categories = [
   { id: 'all', name: 'all', displayName: 'All' },
   { id: 'chicken', name: 'Chicken', displayName: 'Chicken' },
@@ -26,7 +30,6 @@ class SamaRestaurant {
     
     // Initialize from parent constructor
     this.apiEndpoint = null; // Will be configured when API is ready
-    this.cart = [];
     this.currentSlide = 0;
     this.init();
   }
