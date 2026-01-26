@@ -62,6 +62,10 @@ class SamaRestaurant {
     this.initializeSlider();
     this.loadContent(); // Add content loading
 
+    // Initialize product details page if on product-details.html
+    if (window.location.pathname.includes('product-details.html')) {
+      this.loadProductDetails();
+    }
     
     // Initialize menu page if on menu.html
     if (window.location.pathname.includes('menu.html')) {
@@ -84,9 +88,9 @@ class SamaRestaurant {
     }
 
     // Cart modal close
-    const cartClose = document.getElementById('cart-close');
-    if (cartClose) {
-      cartClose.addEventListener('click', () => this.hideCartModal());
+    const cartModalClose = document.getElementById('cart-modal-close');
+    if (cartModalClose) {
+      cartModalClose.addEventListener('click', () => this.hideCartModal());
     }
 
     // Checkout button
@@ -95,24 +99,67 @@ class SamaRestaurant {
       checkoutBtn.addEventListener('click', () => this.checkout());
     }
 
-    // Cart modal backdrop click
-    const cartModal = document.getElementById('cart-modal');
-    if (cartModal) {
-      cartModal.addEventListener('click', (e) => {
-        if (e.target === cartModal) {
-          this.hideCartModal();
-        }
+    // Checkout modal close
+    const checkoutModalClose = document.getElementById('checkout-modal-close');
+    if (checkoutModalClose) {
+      checkoutModalClose.addEventListener('click', () => this.hideCheckoutModal());
+    }
+
+    // Cancel checkout
+    const cancelCheckout = document.getElementById('cancel-checkout');
+    if (cancelCheckout) {
+      cancelCheckout.addEventListener('click', () => this.hideCheckoutModal());
+    }
+
+    // Submit order
+    const submitOrder = document.getElementById('submit-order');
+    if (submitOrder) {
+      submitOrder.addEventListener('click', () => this.processCheckout());
+    }
+
+    // Success modal OK
+    const successOk = document.getElementById('success-ok');
+    if (successOk) {
+      successOk.addEventListener('click', () => {
+        this.hideSuccessModal();
+        window.location.href = 'index.html';
       });
     }
 
-    // Slider controls
-    const prevBtn = document.querySelector('.slider-prev');
-    const nextBtn = document.querySelector('.slider-next');
-    if (prevBtn) prevBtn.addEventListener('click', () => this.prevSlide());
-    if (nextBtn) nextBtn.addEventListener('click', () => this.nextSlide());
+    // Checkout form submission
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+      checkoutForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.processCheckout();
+      });
+    }
 
-    // Auto-play slider
-    setInterval(() => this.nextSlide(), 5000);
+    // Modal backdrop clicks
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    // Delete modal
+    const confirmDelete = document.getElementById('confirm-delete');
+    if (confirmDelete) {
+      confirmDelete.addEventListener('click', () => this.confirmDeleteMeal());
+    }
+
+    const cancelDelete = document.getElementById('cancel-delete');
+    if (cancelDelete) {
+      cancelDelete.addEventListener('click', () => this.closeDeleteModal());
+    }
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener('click', () => this.toggleMobileMenu());
+    }
   }
 
   toggleTheme() {
@@ -636,13 +683,17 @@ class SamaRestaurant {
     
     return `
       <div class="meal-card" data-meal-id="${meal.id}">
-        <img src="${meal.image}" alt="${meal.name}" class="meal-image">
-        <div class="meal-content">
-          <h3 class="meal-name">${meal.name}</h3>
-          <p class="meal-price">$${meal.price}</p>
-          <p class="meal-description expandable" data-meal-id="${meal.id}">
-            ${this.truncateDescription(meal.description)}
-          </p>
+        <div class="meal-clickable-area" onclick="window.location.href='product-details.html?id=${meal.id}'">
+          <img src="${meal.image}" alt="${meal.name}" class="meal-image">
+          <div class="meal-content">
+            <h3 class="meal-name">${meal.name}</h3>
+            <p class="meal-price">$${meal.price}</p>
+            <p class="meal-description expandable" data-meal-id="${meal.id}">
+              ${this.truncateDescription(meal.description)}
+            </p>
+          </div>
+        </div>
+        <div class="meal-actions">
           ${quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal)}
         </div>
       </div>
@@ -679,20 +730,26 @@ class SamaRestaurant {
   attachMealCardListeners() {
   // Use event delegation for dynamically created elements
   document.addEventListener('click', (e) => {
-    // Description click for modal
+    // Description click for modal - prevent navigation
     if (e.target.classList.contains('meal-description') && e.target.classList.contains('expandable')) {
+      e.preventDefault();
+      e.stopPropagation();
       const mealId = parseInt(e.target.dataset.mealId);
       this.showMealModal(mealId);
     }
     
     // Add to cart buttons
     if (e.target.classList.contains('add-to-cart-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
       const mealId = parseInt(e.target.dataset.mealId);
       this.addToCart(mealId);
     }
     
     // Counter buttons
     if (e.target.classList.contains('counter-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
       const mealId = e.target.dataset.mealId;
       const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
       this.updateCartItemQuantity(mealId, action);
@@ -934,9 +991,9 @@ updateMealCard(mealId) {
   const cartItem = this.cart.find(item => item.id === mealId.toString());
   const quantity = cartItem ? cartItem.quantity : 0;
   
-  const buttonContainer = mealCard.querySelector('.meal-content').lastElementChild;
+  const buttonContainer = mealCard.querySelector('.meal-actions');
   if (buttonContainer) {
-    buttonContainer.outerHTML = quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal);
+    buttonContainer.innerHTML = quantity > 0 ? this.createMealCounter(meal, quantity) : this.createAddToCartButton(meal);
   }
 }
 
@@ -1115,30 +1172,355 @@ checkout() {
     return;
   }
 
+  this.hideCartModal();
+  this.showCheckoutModal();
+}
+
+showCheckoutModal() {
+  const modal = document.getElementById('checkout-modal');
+  if (modal) {
+    this.renderCheckoutOrderItems();
+    this.updateCheckoutSummary();
+    modal.classList.add('active');
+  }
+}
+
+hideCheckoutModal() {
+  const modal = document.getElementById('checkout-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+renderCheckoutOrderItems() {
+  const container = document.getElementById('checkout-order-items');
+  if (!container) return;
+
+  if (this.cart.length === 0) {
+    container.innerHTML = '<p>Your cart is empty</p>';
+    return;
+  }
+
+  container.innerHTML = this.cart.map(item => `
+    <div class="checkout-item">
+      <div class="checkout-item-info">
+        <span class="checkout-item-name">${item.name}</span>
+        <span class="checkout-item-quantity">x${item.quantity}</span>
+      </div>
+      <span class="checkout-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+    </div>
+  `).join('');
+}
+
+updateCheckoutSummary() {
   const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.1;
-  const delivery = 5.00;
+  const delivery = this.cart.length > 0 ? 5.00 : 0;
   const total = subtotal + tax + delivery;
 
-  const orderSummary = {
-    items: this.cart,
-    subtotal: subtotal,
-    tax: tax,
-    delivery: delivery,
-    total: total,
-    timestamp: new Date().toISOString()
+  const subtotalElement = document.getElementById('checkout-subtotal');
+  const taxElement = document.getElementById('checkout-tax');
+  const deliveryElement = document.getElementById('checkout-delivery');
+  const totalElement = document.getElementById('checkout-total');
+
+  if (subtotalElement) subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+  if (taxElement) taxElement.textContent = `$${tax.toFixed(2)}`;
+  if (deliveryElement) deliveryElement.textContent = `$${delivery.toFixed(2)}`;
+  if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
+}
+
+validateCheckoutForm() {
+  const name = document.getElementById('customer-name');
+  const phone = document.getElementById('customer-phone');
+  const city = document.getElementById('customer-city');
+  const street = document.getElementById('customer-street');
+  const building = document.getElementById('customer-building');
+  const payment = document.querySelector('input[name="payment"]:checked');
+
+  let isValid = true;
+
+  // Reset error messages
+  document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
+
+  // Validate name (text only)
+  if (!name.value.trim() || !/^[A-Za-z\s]+$/.test(name.value.trim())) {
+    document.getElementById('name-error').style.display = 'block';
+    isValid = false;
+  }
+
+  // Validate phone (Jordanian format: 9 digits starting with 7)
+  if (!phone.value.trim() || !/^7[0-9]{8}$/.test(phone.value.trim())) {
+    document.getElementById('phone-error').style.display = 'block';
+    isValid = false;
+  }
+
+  // Validate address
+  if (!city.value.trim() || !street.value.trim() || !building.value.trim()) {
+    document.getElementById('address-error').style.display = 'block';
+    isValid = false;
+  }
+
+  // Validate payment method
+  if (!payment) {
+    document.getElementById('payment-error').style.display = 'block';
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+async submitOrderToGoogleSheets(orderData) {
+  try {
+    const response = await fetch('YOUR_GOOGLE_SCRIPT_WEB_APP_URL', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    // Since we're using no-cors, we won't get detailed response info
+    // but we assume success if no network error
+    return { success: true };
+  } catch (error) {
+    console.error('Error submitting order to Google Sheets:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async processCheckout() {
+  if (!this.validateCheckoutForm()) {
+    return;
+  }
+
+  const submitBtn = document.getElementById('submit-order');
+  const btnText = submitBtn.querySelector('.btn-text');
+  const btnLoading = submitBtn.querySelector('.btn-loading');
+
+  // Show loading state
+  btnText.style.display = 'none';
+  btnLoading.style.display = 'flex';
+  submitBtn.disabled = true;
+
+  try {
+    const name = document.getElementById('customer-name').value;
+    const phone = document.getElementById('customer-phone').value;
+    const city = document.getElementById('customer-city').value;
+    const street = document.getElementById('customer-street').value;
+    const building = document.getElementById('customer-building').value;
+    const notes = document.getElementById('customer-notes').value;
+    const payment = document.querySelector('input[name="payment"]:checked').value;
+
+    const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const tax = subtotal * 0.1;
+    const delivery = 5.00;
+    const total = subtotal + tax + delivery;
+
+    const orderData = {
+      customer: {
+        name: name,
+        phone: phone,
+        address: `${city}, ${street}, ${building}`,
+        notes: notes,
+        paymentMethod: payment
+      },
+      items: this.cart.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.price * item.quantity
+      })),
+      totals: {
+        subtotal: subtotal,
+        tax: tax,
+        delivery: delivery,
+        total: total
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    // Submit to Google Sheets
+    const result = await this.submitOrderToGoogleSheets(orderData);
+
+    if (result.success) {
+      // Clear cart and show success
+      this.cart = [];
+      this.updateCartUI();
+      this.saveCartToStorage();
+      this.hideCheckoutModal();
+      this.showSuccessModal();
+    } else {
+      throw new Error('Failed to submit order');
+    }
+  } catch (error) {
+    console.error('Checkout error:', error);
+    this.showToast('Something went wrong, please try again');
+  } finally {
+    // Reset button state
+    btnText.style.display = 'inline';
+    btnLoading.style.display = 'none';
+    submitBtn.disabled = false;
+  }
+}
+
+showSuccessModal() {
+  const modal = document.getElementById('success-modal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+hideSuccessModal() {
+  const modal = document.getElementById('success-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+// Product Details Page Methods
+async loadProductDetails() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const mealId = urlParams.get('id');
+
+  if (!mealId) {
+    this.showProductError();
+    return;
+  }
+
+  try {
+    this.showLoadingState();
+    
+    // Fetch from TheMealDB API
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`);
+    const data = await response.json();
+
+    if (data.meals && data.meals.length > 0) {
+      const meal = data.meals[0];
+      this.displayProductDetails(meal);
+    } else {
+      this.showProductError();
+    }
+  } catch (error) {
+    console.error('Error loading product details:', error);
+    this.showProductError();
+  }
+}
+
+showLoadingState() {
+  const loadingState = document.getElementById('loading-state');
+  const productDetails = document.getElementById('product-details');
+  const errorState = document.getElementById('error-state');
+
+  if (loadingState) loadingState.style.display = 'block';
+  if (productDetails) productDetails.style.display = 'none';
+  if (errorState) errorState.style.display = 'none';
+}
+
+showProductError() {
+  const loadingState = document.getElementById('loading-state');
+  const productDetails = document.getElementById('product-details');
+  const errorState = document.getElementById('error-state');
+
+  if (loadingState) loadingState.style.display = 'none';
+  if (productDetails) productDetails.style.display = 'none';
+  if (errorState) errorState.style.display = 'block';
+}
+
+displayProductDetails(meal) {
+  const loadingState = document.getElementById('loading-state');
+  const productDetails = document.getElementById('product-details');
+  const errorState = document.getElementById('error-state');
+
+  if (loadingState) loadingState.style.display = 'none';
+  if (errorState) errorState.style.display = 'none';
+
+  if (productDetails) {
+    productDetails.style.display = 'block';
+
+    // Update product information
+    const productImage = document.getElementById('product-image');
+    const productTitle = document.getElementById('product-title');
+    const productPrice = document.getElementById('product-price');
+    const productCategory = document.getElementById('product-category');
+    const productDescription = document.getElementById('product-description');
+
+    if (productImage) {
+      productImage.src = meal.strMealThumb || 'assets/placeholder-meal.jpg';
+      productImage.alt = meal.strMeal || 'Product Image';
+    }
+
+    if (productTitle) {
+      productTitle.textContent = meal.strMeal || 'Unknown Meal';
+    }
+
+    if (productPrice) {
+      // Generate a price based on the meal ID for demo purposes
+      const price = (Math.abs(parseInt(meal.idMeal)) % 20 + 10) + 0.99;
+      productPrice.textContent = `$${price.toFixed(2)}`;
+    }
+
+    if (productCategory) {
+      productCategory.textContent = meal.strCategory || 'Special';
+    }
+
+    if (productDescription) {
+      productDescription.textContent = meal.strInstructions || 'Delicious meal prepared with fresh ingredients and authentic spices.';
+    }
+
+    // Setup quantity controls
+    this.setupProductQuantityControls(meal);
+  }
+}
+
+setupProductQuantityControls(meal) {
+  const decrementBtn = document.getElementById('decrement-btn');
+  const incrementBtn = document.getElementById('increment-btn');
+  const quantityValue = document.getElementById('quantity-value');
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+
+  let quantity = 1;
+
+  const updateQuantityDisplay = () => {
+    if (quantityValue) {
+      quantityValue.textContent = quantity;
+    }
   };
 
-  localStorage.setItem('currentOrder', JSON.stringify(orderSummary));
-  this.cart = [];
-  this.updateCartUI();
-  this.saveCartToStorage();
-  this.hideCartModal();
-  this.showToast('Order placed successfully!');
+  if (decrementBtn) {
+    decrementBtn.addEventListener('click', () => {
+      if (quantity > 1) {
+        quantity--;
+        updateQuantityDisplay();
+      }
+    });
+  }
 
-  setTimeout(() => {
-    alert(`Order placed successfully!\n\nOrder Total: $${total.toFixed(2)}\n\nThank you for your order!`);
-  }, 1000);
+  if (incrementBtn) {
+    incrementBtn.addEventListener('click', () => {
+      quantity++;
+      updateQuantityDisplay();
+    });
+  }
+
+  if (addToCartBtn) {
+    addToCartBtn.addEventListener('click', () => {
+      const price = (Math.abs(parseInt(meal.idMeal)) % 20 + 10) + 0.99;
+      const cartItem = {
+        id: meal.idMeal,
+        name: meal.strMeal,
+        price: price,
+        image: meal.strMealThumb || 'assets/placeholder-meal.jpg',
+        quantity: quantity
+      };
+
+      this.addToCart(cartItem);
+      
+      // Reset quantity
+      quantity = 1;
+      updateQuantityDisplay();
+    });
+  }
 }
 
   // Navigation

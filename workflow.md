@@ -45,6 +45,25 @@ use same api integration you used in slider image for getting the items data fro
 
 
 
+Clicking on the meal item in home page or menu page move me to the product page 
+
+*Product page conatins: 
+- same header and same footer as home page 
+- product image on the left side of the page 
+- product details on the right side of the page (contains: product title, product price, product description, small card for increment and decrement buttons with add to cart button)
+When the user clicks on the "add to cart" button, the meal should be added to the cart and a toast message "Meal added to cart" should be shown. same as menu page 
+
+For google sheet integration:
+When the user click on check out button, show a modal with the following fields:
+- Name
+- Phone with prefilled data 7XXXXXXXX
+- Address: City, street, Building number, additional notes 
+- Payment method: Cash on delievry , Online payment
+- Submit button
+
+When the user click on submit button, send the data to google sheet by API and show a pop up message "Order submitted successfully" with "Thank you for your order, we will contact you once the order is out for delivery"
+
+
 
 
 

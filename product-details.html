@@ -9,13 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="product-page">
     <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <img src="assets/logo.png" alt="Sama Restaurant Logo">
+                    <a href="index.html">
+                        <img src="assets/logo.png" alt="Sama Restaurant Logo">
+                    </a>
                 </div>
                 <div class="header-actions">
                     <button class="theme-toggle" aria-label="Toggle dark mode">
@@ -44,10 +46,94 @@
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main class="main">
         <div class="container">
-            <div class="product-details">
-                <!-- Product details will be dynamically loaded here -->
+            <!-- Loading State -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading product details...</p>
+            </div>
+
+            <!-- Product Details -->
+            <div class="product-details" id="product-details" style="display: none;">
+                <div class="product-container">
+                    <!-- Product Image -->
+                    <div class="product-image-section">
+                        <img id="product-image" src="" alt="" class="product-image">
+                        <div class="product-badge" id="product-badge">Popular</div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info-section">
+                        <h1 class="product-title" id="product-title">Loading...</h1>
+                        <div class="product-price-section">
+                            <span class="product-price" id="product-price">$0.00</span>
+                            <span class="product-category" id="product-category">Category</span>
+                        </div>
+                        
+                        <p class="product-description" id="product-description">
+                            Loading product description...
+                        </p>
+
+                        <!-- Quantity Controls -->
+                        <div class="product-controls">
+                            <div class="quantity-card">
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn decrement" id="decrement-btn">−</button>
+                                    <span class="quantity-value" id="quantity-value">1</span>
+                                    <button class="quantity-btn increment" id="increment-btn">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" id="add-to-cart-btn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 2L6 9H22L19 2H9Z"/>
+                                        <path d="M6 9H6.01"/>
+                                        <path d="M19 9H19.01"/>
+                                        <path d="M6 9V16C6 16.5 6.5 17 7 17H17C17.5 17 18 16.5 18 16V9"/>
+                                        <path d="M8 21H16"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Features -->
+                        <div class="product-features">
+                            <div class="feature">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                </svg>
+                                <span>Premium Quality</span>
+                            </div>
+                            <div class="feature">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6V12L16 14"/>
+                                </svg>
+                                <span>Fresh Ingredients</span>
+                            </div>
+                            <div class="feature">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21V19C20 17.9 19.1 17 18 17H6C4.9 17 4 17.9 4 19V21"/>
+                                    <path d="M16 7C16 9.2 14.2 11 12 11S8 9.2 8 7S9.8 3 12 3S16 4.8 16 7Z"/>
+                                </svg>
+                                <span>Expert Chef</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" id="error-state" style="display: none;">
+                <div class="error-content">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8V12M12 16H12.01"/>
+                    </svg>
+                    <h2>Product Not Found</h2>
+                    <p>Sorry, we couldn't find the product you're looking for.</p>
+                    <a href="menu.html" class="cta-btn">Browse Menu</a>
+                </div>
             </div>
         </div>
     </main>
@@ -56,44 +142,200 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-column">
-                    <h3>Policies</h3>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                        <li><a href="#">Return Policy</a></li>
+                <!-- Policies -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-policies-title">Policies</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" id="footer-privacy">Privacy Policy</a></li>
+                        <li><a href="#" id="footer-terms">Terms & Conditions</a></li>
+                        <li><a href="#" id="footer-returns">Return Policy</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h3>Contact & Support</h3>
-                    <ul>
-                        <li>+962 7 XXXX XXXX</li>
-                        <li>info@sama-restaurant.com</li>
-                        <li>Amman, Jordan</li>
+
+                <!-- Contact & Support -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-contact-title">Contact & Support</h3>
+                    <ul class="footer-links">
+                        <li id="footer-phone">📱 +962 7XXXXXXX</li>
+                        <li id="footer-email">📧 info@sama-restaurant.com</li>
+                        <li id="footer-location">📍 Amman, Jordan</li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h3>Follow Us</h3>
-                    <div class="social-icons">
-                        <a href="#" aria-label="Instagram">📷</a>
-                        <a href="#" aria-label="X">𝕏</a>
-                        <a href="#" aria-label="Facebook">📘</a>
+
+                <!-- Follow Us -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-social-title">Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link" id="footer-instagram" aria-label="Instagram">📷</a>
+                        <a href="#" class="social-link" id="footer-twitter" aria-label="Twitter">𝕏</a>
+                        <a href="#" class="social-link" id="footer-facebook" aria-label="Facebook">📘</a>
                     </div>
                 </div>
-                <div class="footer-column">
-                    <h3>Hours</h3>
-                    <ul>
-                        <li>Monday - Friday: 11:00 AM - 10:00 PM</li>
-                        <li>Saturday - Sunday: 12:00 PM - 11:00 PM</li>
+
+                <!-- Hours -->
+                <div class="footer-section">
+                    <h3 class="footer-title" id="footer-hours-title">Hours</h3>
+                    <ul class="footer-hours" id="footer-hours-list">
+                        <li>Mon-Thu: 11:00 AM - 10:00 PM</li>
+                        <li>Fri-Sat: 11:00 AM - 11:00 PM</li>
+                        <li>Sunday: 12:00 PM - 9:00 PM</li>
                     </ul>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                <p>© 2026 Sama Restaurant. All rights reserved.</p>
+                <p id="footer-copyright">© 2026 Sama Restaurant. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.376C6.51168 20.6301 4.78465 19.2515 3.61096 17.4422C2.43727 15.6328 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999"/>
+                <path d="M22 4L12 14.01L9 11.01"/>
+            </svg>
+            <span class="toast-message" id="toast-message">Item added to cart!</span>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Cart</h2>
+                <button class="modal-close" id="cart-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cart-items" id="cart-items">
+                    <!-- Cart items will be rendered here -->
+                </div>
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="cart-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (10%):</span>
+                        <span id="cart-tax">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery:</span>
+                        <span id="cart-delivery">$0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="cart-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cta-btn" id="checkout-btn">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content checkout-modal">
+            <div class="modal-header">
+                <h2>Checkout</h2>
+                <button class="modal-close" id="checkout-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="customer-name">Name *</label>
+                        <input type="text" id="customer-name" name="name" required pattern="[A-Za-z\s]+" title="Please enter text only">
+                        <span class="error-message" id="name-error">Please enter a valid name</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-phone">Phone *</label>
+                        <input type="tel" id="customer-phone" name="phone" required pattern="7[0-9]{8}" maxlength="9" title="Please enter a valid Jordanian phone number (9 digits starting with 7)" value="7">
+                        <span class="error-message" id="phone-error">Please enter a valid Jordanian phone number (9 digits starting with 7)</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-address">Address *</label>
+                        <div class="address-fields">
+                            <input type="text" id="customer-city" name="city" placeholder="City" required>
+                            <input type="text" id="customer-street" name="street" placeholder="Street" required>
+                            <input type="text" id="customer-building" name="building" placeholder="Building Number" required>
+                            <textarea id="customer-notes" name="notes" placeholder="Additional Notes (Optional)"></textarea>
+                        </div>
+                        <span class="error-message" id="address-error">Please fill in all address fields</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Payment Method *</label>
+                        <div class="payment-methods">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="cash" required>
+                                <span class="payment-label">Cash on Delivery</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="online" required>
+                                <span class="payment-label">Online Payment</span>
+                            </label>
+                        </div>
+                        <span class="error-message" id="payment-error">Please select a payment method</span>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <h3>Order Summary</h3>
+                        <div id="checkout-order-items">
+                            <!-- Order items will be rendered here -->
+                        </div>
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="checkout-subtotal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax (10%):</span>
+                            <span id="checkout-tax">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery:</span>
+                            <span id="checkout-delivery">$0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="checkout-total">$0.00</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancel-checkout">Cancel</button>
+                <button type="submit" form="checkout-form" class="cta-btn" id="submit-order">
+                    <span class="btn-text">Submit Order</span>
+                    <span class="btn-loading" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        Submitting...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content success-modal">
+            <div class="success-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.376C6.51168 20.6301 4.78465 19.2515 3.61096 17.4422C2.43727 15.6328 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999"/>
+                    <path d="M22 4L12 14.01L9 11.01"/>
+                </svg>
+            </div>
+            <h2>Order Submitted Successfully!</h2>
+            <p>Thank you for your order, we will contact you once the order is out for delivery</p>
+            <button class="cta-btn" id="success-ok">OK</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="content.js"></script>
     <script src="script.js"></script>
 </body>
