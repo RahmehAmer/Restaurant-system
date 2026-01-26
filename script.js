@@ -58,6 +58,7 @@ class SamaRestaurant {
     this.updateCartUI();
     this.initializeSlider();
     this.loadContent(); // Add content loading
+
     
     // Initialize menu page if on menu.html
     if (window.location.pathname.includes('menu.html')) {
@@ -979,7 +980,7 @@ renderCartItems() {
       </div>
       <div class="cart-item-controls">
         <div class="cart-counter">
-          <button class="cart-counter-btn decrement" data-item-id="${item.id}">−</button>
+          <button class="cart-counter-btn decrement" data-item-id="${item.id}">-</button>
           <span class="cart-counter-value">${item.quantity}</span>
           <button class="cart-counter-btn increment" data-item-id="${item.id}">+</button>
         </div>
@@ -988,30 +989,95 @@ renderCartItems() {
       </div>
     </div>
   `).join('');
-
-  this.attachCartEventListeners();
+this.bindCartButtonEvents();
 }
 
 attachCartEventListeners() {
-  // Use event delegation for dynamically created cart buttons
-  document.addEventListener('click', (e) => {
-    // Cart counter buttons
-    if (e.target.classList.contains('cart-counter-btn')) {
+  // This method is now empty - we use direct binding in bindCartButtonEvents()
+}
+
+bindCartButtonEvents() {
+  console.log('Binding cart button events...');
+  
+  // Check if buttons exist
+  const incrementButtons = document.querySelectorAll('.cart-counter-btn.increment');
+  const decrementButtons = document.querySelectorAll('.cart-counter-btn.decrement');
+  const removeButtons = document.querySelectorAll('.remove-item');
+  
+  console.log('Found increment buttons:', incrementButtons.length);
+  console.log('Found decrement buttons:', decrementButtons.length);
+  console.log('Found remove buttons:', removeButtons.length);
+  
+  // Bind increment buttons
+  incrementButtons.forEach(btn => {
+    btn.onclick = (e) => {
+      console.log('Increment button clicked for item:', btn.dataset.itemId);
       e.preventDefault();
-      const itemId = e.target.dataset.itemId;
-      const action = e.target.classList.contains('increment') ? 'increment' : 'decrement';
-      this.updateCartItemQuantity(itemId, action);
-    }
-    
-    // Remove item buttons
-    if (e.target.classList.contains('remove-item')) {
-      e.preventDefault();
-      const itemId = e.target.dataset.itemId;
-      this.removeFromCart(itemId);
-      this.renderCartItems();
-      this.updateCartSummary();
-    }
+      e.stopPropagation();
+      const itemId = btn.dataset.itemId;
+      const cartItem = this.cart.find(item => item.id === itemId);
+      if (cartItem) {
+        cartItem.quantity++;
+        this.updateCartUI();
+        this.saveCartToStorage();
+        // Update just the quantity display and summary
+        this.updateCartItemDisplay(itemId);
+        this.updateCartSummary();
+      }
+    };
   });
+
+  // Bind decrement buttons
+  decrementButtons.forEach(btn => {
+    console.log('Binding decrement button for item:', btn.dataset.itemId);
+    btn.onclick = (e) => {
+      console.log('Decrement button clicked for item:', btn.dataset.itemId);
+      e.preventDefault();
+      e.stopPropagation();
+      const itemId = btn.dataset.itemId;
+      const cartItem = this.cart.find(item => item.id === itemId);
+      if (cartItem && cartItem.quantity > 1) {
+        cartItem.quantity--;
+        this.updateCartUI();
+        this.saveCartToStorage();
+        // Update just the quantity display and summary
+        this.updateCartItemDisplay(itemId);
+        this.updateCartSummary();
+      }
+    };
+  });
+
+  // Bind remove buttons
+  removeButtons.forEach(btn => {
+    btn.onclick = (e) => {
+      console.log('Remove button clicked for item:', btn.dataset.itemId);
+      e.preventDefault();
+      e.stopPropagation();
+      const itemId = btn.dataset.itemId;
+      this.removeFromCart(itemId);
+    };
+  });
+}
+
+updateCartItemDisplay(itemId) {
+  const cartItem = this.cart.find(item => item.id === itemId);
+  if (cartItem) {
+    // Find the cart item container
+    const cartItemContainer = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (cartItemContainer) {
+      // Update the quantity display
+      const quantitySpan = cartItemContainer.querySelector('.cart-counter-value');
+      if (quantitySpan) {
+        quantitySpan.textContent = cartItem.quantity;
+      }
+      
+      // Update the total display
+      const totalDiv = cartItemContainer.querySelector('.cart-item-total');
+      if (totalDiv) {
+        totalDiv.textContent = `$${(cartItem.price * cartItem.quantity).toFixed(2)}`;
+      }
+    }
+  }
 }
 
 updateCartSummary() {
@@ -1036,6 +1102,7 @@ removeFromCart(itemId) {
   this.updateCartUI();
   this.renderCartItems();
   this.updateCartSummary();
+  this.saveCartToStorage();
   this.showToast('Item removed from cart');
 }
 
