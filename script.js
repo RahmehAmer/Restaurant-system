@@ -36,16 +36,18 @@ class SamaRestaurant {
 
   // Cart Persistence Methods
   loadCartFromStorage() {
-    try {
-      const savedCart = localStorage.getItem('samaRestaurantCart');
-      if (savedCart) {
-        this.cart = JSON.parse(savedCart);
-      }
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      this.cart = [];
+  try {
+    const savedCart = localStorage.getItem('samaRestaurantCart');
+    console.log('Loading cart from storage:', savedCart);  // ADD THIS
+    if (savedCart) {
+      this.cart = JSON.parse(savedCart);
+      console.log('Parsed cart:', this.cart);  // ADD THIS
     }
+  } catch (error) {
+    console.error('Error loading cart from localStorage:', error);
+    this.cart = [];
   }
+}
 
   saveCartToStorage() {
     try {
@@ -54,24 +56,98 @@ class SamaRestaurant {
       console.error('Error saving cart to localStorage:', error);
     }
   }
+init() {
+  this.loadCartFromStorage();
+  this.setupEventListeners();
+  this.loadTheme();
+  this.updateCartUI();
+  this.initializeSlider();
+  this.loadContent();
 
-  init() {
-    this.setupEventListeners();
-    this.loadTheme();
-    this.updateCartUI();
-    this.initializeSlider();
-    this.loadContent(); // Add content loading
-
-    // Initialize product details page if on product-details.html
-    if (window.location.pathname.includes('product-details.html')) {
-      this.loadProductDetails();
+    // Global event delegation for remove buttons
+  document.addEventListener('click', (e) => {
+    console.log('Click detected on:', e.target); // Test all clicks
+    if (e.target.classList.contains('remove-item')) {
+            console.log('Remove button clicked globally for item:', e.target.dataset.itemId, 'Type:', typeof e.target.dataset.itemId);
+      console.log('Current cart items:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
+      e.preventDefault();
+      e.stopPropagation();
+      const itemId = e.target.dataset.itemId;
+      
+      // Remove the item
+      this.cart = this.cart.filter(item => item.id != itemId);
+      this.updateCartUI();
+      this.saveCartToStorage();
+      
+      // Re-render cart
+      this.renderCartItems();
+      this.updateCartSummary();
+      
+      console.log('Item removed via global delegation');
     }
-    
-    // Initialize menu page if on menu.html
-    if (window.location.pathname.includes('menu.html')) {
-      this.initializeMenuPage();
+  });
+        // Add event delegation to cart modal specifically
+  const cartModal = document.getElementById('cart-modal');
+  if (cartModal) {
+    console.log('Cart modal found, adding event listener');
+    cartModal.addEventListener('click', (e) => {
+      console.log('Modal click detected on:', e.target.tagName, e.target.className);
+      if (e.target.classList.contains('remove-item')) {
+        alert('Remove button clicked! Item ID: ' + e.target.dataset.itemId);
+        console.log('Remove button clicked in modal for item:', e.target.dataset.itemId, 'Type:', typeof e.target.dataset.itemId);
+        console.log('Current cart items BEFORE removal:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
+        e.preventDefault();
+        e.stopPropagation();
+        const itemId = e.target.dataset.itemId;
+        
+        // Remove the item
+        this.cart = this.cart.filter(item => item.id != itemId);
+        console.log('Cart items AFTER removal:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
+        
+        this.updateCartUI();
+        this.saveCartToStorage();
+        
+        // Re-render cart
+        this.renderCartItems();
+        this.updateCartSummary();
+        
+        console.log('Item removed via modal delegation');
+      }
+    });
+  } else {
+    console.log('Cart modal NOT found!');
+  }
+  // Initialize product details page if on product-details.html
+  if (window.location.pathname.includes('product-details.html')) {
+    this.loadProductDetails();
+  }
+  
+  // Initialize menu page if on menu.html
+  if (window.location.pathname.includes('menu.html')) {
+    this.initializeMenuPage();
+  }
+}
+
+updateCartItemDisplay(itemId) {
+  const cartItem = this.cart.find(item => item.id == itemId);
+  if (cartItem) {
+    // Find the cart item container
+    const cartItemContainer = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (cartItemContainer) {
+      // Update the quantity display
+      const quantitySpan = cartItemContainer.querySelector('.cart-counter-value');
+      if (quantitySpan) {
+        quantitySpan.textContent = cartItem.quantity;
+      }
+      
+      // Update the total display
+      const totalDiv = cartItemContainer.querySelector('.cart-item-total');
+      if (totalDiv) {
+        totalDiv.textContent = `$${(parseFloat(cartItem.price) * cartItem.quantity).toFixed(2)}`;
+      }
     }
   }
+}
 
   // Theme Management
   setupEventListeners() {
@@ -160,6 +236,16 @@ class SamaRestaurant {
     if (mobileMenuToggle) {
       mobileMenuToggle.addEventListener('click', () => this.toggleMobileMenu());
     }
+
+    // Slider controls
+    const sliderPrev = document.querySelector('.slider-prev');
+    const sliderNext = document.querySelector('.slider-next');
+    if (sliderPrev) {
+      sliderPrev.addEventListener('click', () => this.prevSlide());
+    }
+    if (sliderNext) {
+      sliderNext.addEventListener('click', () => this.nextSlide());
+    }
   }
 
   toggleTheme() {
@@ -193,25 +279,54 @@ class SamaRestaurant {
     alert(`Cart has ${this.cart.length} items`);
   }
 
-  addToCart(meal) {
-    const existingItem = this.cart.find(item => item.id === meal.id);
-    
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      this.cart.push({ ...meal, quantity: 1 });
-    }
-    
-    this.updateCartUI();
-    this.saveCartToStorage();
-    this.showNotification(`${meal.name} added to cart!`);
+  addToCart(mealOrId) {
+  // Handle both meal object and mealId
+  let meal;
+  let mealId;
+  
+  if (typeof mealOrId === 'object') {
+    meal = mealOrId;  // Slider items
+    mealId = meal.id;
+  } else {
+    mealId = mealOrId;  // Menu items
+    meal = this.allMeals.find(m => m.id === mealId.toString()) || 
+           this.meals.find(m => m.id === mealId.toString());
   }
+  
+  if (!meal) return;
+  
+  const existingItem = this.cart.find(item => item.id === meal.id);
+  
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    this.cart.push({ ...meal, quantity: 1 });
+  }
+  
+  this.updateCartUI();
+  this.saveCartToStorage();
+  this.showNotification(`${meal.name} added to cart!`);
+  
+  // Update meal card if it exists (for menu page items)
+  this.updateMealCard(mealId);
+}
 
   removeFromCart(mealId) {
-    this.cart = this.cart.filter(item => item.id !== mealId);
-    this.updateCartUI();
-    this.saveCartToStorage();
+  // Simplified ID handling for both slider and menu items
+  this.cart = this.cart.filter(item => item.id != mealId);
+  this.updateCartUI();
+  this.saveCartToStorage();
+  
+  // Update meal card if it exists
+  this.updateMealCard(mealId);
+  
+  // Re-render cart modal if it's open
+  const cartModal = document.getElementById('cart-modal');
+  if (cartModal && cartModal.classList.contains('active')) {
+    this.renderCartItems();
+    this.updateCartSummary();
   }
+}
 
   updateCartUI() {
     const cartCount = document.querySelector('.cart-count');
@@ -844,24 +959,26 @@ class SamaRestaurant {
   }
 
   updateCartItemQuantity(mealId, action) {
-    const meal = this.allMeals.find(m => m.id === mealId.toString());
+    const meal = this.allMeals.find(m => m.id === mealId.toString()) || 
+                 this.meals.find(m => m.id === mealId.toString()) ||
+                 this.sliderMeals.find(m => m.id === mealId);
     if (!meal) return;
     
     const cartItem = this.cart.find(item => item.id === mealId.toString());
     if (action === 'increment') {
-  if (cartItem) {
-    cartItem.quantity++;
-    this.updateCartUI();
-    this.updateMealCard(mealId);
-  } else {
-    this.addToCart(mealId);
-  }
-}
+      if (cartItem) {
+        cartItem.quantity++;
+        this.updateCartUI();
+        this.updateMealCard(mealId);
+      } else {
+        this.addToCart(mealId);
+      }
+    }
     else {
       if (cartItem) {
         cartItem.quantity--;
         if (cartItem.quantity === 0) {
-        this.updateMealCard(mealId);
+          this.updateMealCard(mealId);
           this.mealToDelete = cartItem;
           this.showDeleteModal();
         } else {
@@ -938,49 +1055,8 @@ class SamaRestaurant {
   }
 
   // Enhanced addToCart for menu page
-addToCart(mealId) {
-  console.log('addToCart called with mealId:', mealId);
-  console.log('allMeals length:', this.allMeals.length);
-  console.log('meals length:', this.meals.length);
-  
-  // Handle both meal object and mealId
-  let meal;
-  if (typeof mealId === 'object') {
-    meal = mealId;
-  } else {
-    meal = this.allMeals.find(m => m.id === mealId.toString()) || this.meals.find(m => m.id === mealId.toString());
-  }
-  
-  console.log('Found meal:', meal);
-  
-  if (!meal) {
-    console.log('Meal not found, returning');
-    return;
-  }
-  
-  const existingItem = this.cart.find(item => item.id === meal.id);
-  
-  if (existingItem) {
-    existingItem.quantity++;
-  } else {
-    this.cart.push({
-      id: meal.id,
-      name: meal.name,
-      price: parseFloat(meal.price),
-      quantity: 1,
-      image: meal.image
-    });
-  }
-  
-  console.log('Cart after adding:', this.cart);
-  this.updateCartUI();
-  this.showToast('Meal added to cart');
-  this.updateMealCard(mealId);
-  // Close modal if open
-  if (this.selectedMealForModal && this.selectedMealForModal.id === meal.id) {
-    this.closeMealModal();
-  }
-}
+
+
 updateMealCard(mealId) {
   const mealCard = document.querySelector(`[data-meal-id="${mealId}"]`);
   if (!mealCard) return;
@@ -1036,7 +1112,7 @@ renderCartItems() {
       <img src="${item.image}" alt="${item.name}" class="cart-item-image">
       <div class="cart-item-details">
         <h4 class="cart-item-name">${item.name}</h4>
-        <p class="cart-item-price">$${item.price.toFixed(2)} each</p>
+        <p class="cart-item-price">$${parseFloat(item.price).toFixed(2)} each</p>
       </div>
       <div class="cart-item-controls">
         <div class="cart-counter">
@@ -1044,7 +1120,7 @@ renderCartItems() {
           <span class="cart-counter-value">${item.quantity}</span>
           <button class="cart-counter-btn increment" data-item-id="${item.id}">+</button>
         </div>
-        <div class="cart-item-total">$${(item.price * item.quantity).toFixed(2)}</div>
+        <div class="cart-item-total">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</div>
         <button class="remove-item" data-item-id="${item.id}">Remove</button>
       </div>
     </div>
@@ -1058,7 +1134,7 @@ attachCartEventListeners() {
 
 bindCartButtonEvents() {
   console.log('Binding cart button events...');
-  
+  console.log('Current cart items:', this.cart);
   // Check if buttons exist
   const incrementButtons = document.querySelectorAll('.cart-counter-btn.increment');
   const decrementButtons = document.querySelectorAll('.cart-counter-btn.decrement');
@@ -1067,25 +1143,44 @@ bindCartButtonEvents() {
   console.log('Found increment buttons:', incrementButtons.length);
   console.log('Found decrement buttons:', decrementButtons.length);
   console.log('Found remove buttons:', removeButtons.length);
-  
-  // Bind increment buttons
   incrementButtons.forEach(btn => {
-    btn.onclick = (e) => {
-      console.log('Increment button clicked for item:', btn.dataset.itemId);
-      e.preventDefault();
-      e.stopPropagation();
-      const itemId = btn.dataset.itemId;
-      const cartItem = this.cart.find(item => item.id === itemId);
-      if (cartItem) {
-        cartItem.quantity++;
-        this.updateCartUI();
-        this.saveCartToStorage();
-        // Update just the quantity display and summary
-        this.updateCartItemDisplay(itemId);
-        this.updateCartSummary();
-      }
-    };
+    console.log('Increment button data-item-id:', btn.dataset.itemId, 'Type:', typeof btn.dataset.itemId);
   });
+  decrementButtons.forEach(btn => {
+    console.log('Decrement button data-item-id:', btn.dataset.itemId, 'Type:', typeof btn.dataset.itemId);
+  });
+  removeButtons.forEach(btn => {
+    console.log('Remove button data-item-id:', btn.dataset.itemId, 'Type:', typeof btn.dataset.itemId);
+  });
+  
+
+  
+        // Bind increment buttons
+    incrementButtons.forEach(btn => {
+      btn.onclick = (e) => {
+        console.log('Increment button clicked for item:', btn.dataset.itemId);
+        e.preventDefault();
+        e.stopPropagation();
+        const itemId = btn.dataset.itemId;
+        
+        // ADD THIS DEBUGGING:
+        console.log('Looking for item with ID:', itemId, 'Type:', typeof itemId);
+        console.log('Cart items:', this.cart.map(item => ({ id: item.id, type: typeof item.id })));
+        
+        const cartItem = this.cart.find(item => item.id == itemId);
+        console.log('Found cart item:', cartItem);
+        
+        if (cartItem) {
+          cartItem.quantity++;
+          this.updateCartUI();
+          this.saveCartToStorage();
+          this.updateCartItemDisplay(itemId);
+          this.updateCartSummary();
+        } else {
+          console.log('Cart item NOT found!');
+        }
+      };
+    });
 
   // Bind decrement buttons
   decrementButtons.forEach(btn => {
@@ -1095,7 +1190,7 @@ bindCartButtonEvents() {
       e.preventDefault();
       e.stopPropagation();
       const itemId = btn.dataset.itemId;
-      const cartItem = this.cart.find(item => item.id === itemId);
+      const cartItem = this.cart.find(item => item.id == itemId);
       if (cartItem && cartItem.quantity > 1) {
         cartItem.quantity--;
         this.updateCartUI();
@@ -1106,21 +1201,33 @@ bindCartButtonEvents() {
       }
     };
   });
+  
 
-  // Bind remove buttons
+  console.log('About to bind remove buttons. Found:', removeButtons.length, 'remove buttons');
+  // Bind remove buttons - test approach
+          
   removeButtons.forEach(btn => {
+    console.log('Binding remove button:', btn);
     btn.onclick = (e) => {
+      alert('CLICK WORKS! Item ID: ' + btn.dataset.itemId);
       console.log('Remove button clicked for item:', btn.dataset.itemId);
       e.preventDefault();
       e.stopPropagation();
       const itemId = btn.dataset.itemId;
-      this.removeFromCart(itemId);
+      const cartItem = this.cart.find(item => item.id == itemId);
+      if (cartItem) {
+        this.removeFromCart(itemId);
+        this.renderCartItems();
+        this.updateCartSummary();
+      } else {
+        console.log('Cart item NOT found for removal!');
+      }
     };
   });
-}
+  }
 
 updateCartItemDisplay(itemId) {
-  const cartItem = this.cart.find(item => item.id === itemId);
+  const cartItem = this.cart.find(item => item.id == itemId);
   if (cartItem) {
     // Find the cart item container
     const cartItemContainer = document.querySelector(`[data-item-id="${itemId}"]`);
@@ -1134,7 +1241,7 @@ updateCartItemDisplay(itemId) {
       // Update the total display
       const totalDiv = cartItemContainer.querySelector('.cart-item-total');
       if (totalDiv) {
-        totalDiv.textContent = `$${(cartItem.price * cartItem.quantity).toFixed(2)}`;
+        totalDiv.textContent = `$${(parseFloat(cartItem.price) * cartItem.quantity).toFixed(2)}`;
       }
     }
   }
