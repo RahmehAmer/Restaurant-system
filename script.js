@@ -110,7 +110,13 @@ updateCartItemDisplay(itemId) {
       cartBtn.addEventListener('click', () => this.showCartModal());
     }
 
-    // Cart modal close
+    // Cart modal close (X button)
+    const cartCloseBtn = document.getElementById('cart-close');
+    if (cartCloseBtn) {
+      cartCloseBtn.addEventListener('click', () => this.hideCartModal());
+    }
+
+    // Cart modal close (backup ID)
     const cartModalClose = document.getElementById('cart-modal-close');
     if (cartModalClose) {
       cartModalClose.addEventListener('click', () => this.hideCartModal());
