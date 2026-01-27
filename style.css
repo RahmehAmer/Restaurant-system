@@ -777,20 +777,17 @@ main {
 
 /* Toast Notification */
 .toast {
-  position: fixed !important;
-  bottom: 20px !important;
-  right: 20px !important;
-  top: auto !important;
-  left: auto !important;
+  position: fixed;
+  bottom: 20px;  /* Changed from top: 20px */
+  right: 20px;    /* Changed from right: 20px */
   background: var(--primary-color);
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 8px;
   box-shadow: var(--shadow-md);
-  z-index: 9999;
+  z-index: 1001;
   transform: translateX(120%);
   transition: transform 0.3s ease;
-  min-width: 250px;
 }
 
 .toast.show {
@@ -1646,6 +1643,41 @@ body.product-page .product-category {
   font-size: 0.875rem;
   font-weight: 500;
   border: 1px solid var(--border-color);
+}
+
+/* Product Details Read More Functionality */
+.product-description.truncated {
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
+  -webkit-line-clamp: 3;
+  -moz-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-description.full {
+  display: block;
+}
+
+.read-more-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  transition: var(--transition);
+  align-self: flex-start;
+}
+
+.read-more-btn:hover {
+  background: var(--primary-dark);
 }
 
 body.product-page .product-description {

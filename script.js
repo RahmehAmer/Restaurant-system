@@ -306,6 +306,9 @@ updateCartItemDisplay(itemId) {
       this.loadPlaceholderMeals();
     }
     
+    // Save slider meals to localStorage for product details page
+    localStorage.setItem('sliderMeals', JSON.stringify(this.sliderMeals));
+    
     this.renderSlider();
   }
 
@@ -1474,11 +1477,23 @@ async loadProductDetails() {
   try {
     this.showLoadingState();
     
-    // First, try to find the meal in localStorage (from menu page)
+    // First, try to find the meal in slider meals
+    const storedSliderMeals = localStorage.getItem('sliderMeals');
+    if (storedSliderMeals) {
+      const sliderMeals = JSON.parse(storedSliderMeals);
+      const meal = sliderMeals.find(m => m.id == mealId); // Use loose equality
+      
+      if (meal) {
+        this.displayProductDetails(meal);
+        return;
+      }
+    }
+    
+    // Then try menu meals
     const storedMeals = localStorage.getItem('allMeals');
     if (storedMeals) {
       const meals = JSON.parse(storedMeals);
-      const meal = meals.find(m => m.id == mealId); // Use loose equality for ID matching
+      const meal = meals.find(m => m.id == mealId); // Use loose equality
       
       if (meal) {
         this.displayProductDetails(meal);
@@ -1560,7 +1575,39 @@ displayProductDetails(meal) {
     }
 
     if (productDescription) {
-      productDescription.textContent = meal.strInstructions || meal.description || 'Delicious meal prepared with fresh ingredients and authentic spices.';
+      const description = meal.strInstructions || meal.description || 'Delicious meal prepared with fresh ingredients and authentic spices.';
+      
+      // Check if description is long (more than 150 characters)
+      if (description.length > 150) {
+        productDescription.textContent = description;
+        productDescription.classList.add('truncated');
+        
+        // Show read more button
+        const readMoreBtn = document.getElementById('read-more-btn');
+        if (readMoreBtn) {
+          readMoreBtn.style.display = 'inline-block';
+          readMoreBtn.onclick = () => {
+            if (productDescription.classList.contains('truncated')) {
+              productDescription.classList.remove('truncated');
+              productDescription.classList.add('full');
+              readMoreBtn.textContent = 'Read Less';
+            } else {
+              productDescription.classList.remove('full');
+              productDescription.classList.add('truncated');
+              readMoreBtn.textContent = 'Read More';
+            }
+          };
+        }
+      } else {
+        productDescription.textContent = description;
+        productDescription.classList.add('full');
+        
+        // Hide read more button for short descriptions
+        const readMoreBtn = document.getElementById('read-more-btn');
+        if (readMoreBtn) {
+          readMoreBtn.style.display = 'none';
+        }
+      }
     }
 
     // Setup quantity controls
