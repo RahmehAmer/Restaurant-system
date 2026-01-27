@@ -1802,6 +1802,231 @@ body.product-page .error-content p {
   margin: 0;
 }
 
+/* Checkout Modal Styles */
+#checkout-modal .modal-content {
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+#checkout-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#checkout-modal .modal-header h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+#checkout-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.checkout-section {
+  margin-bottom: 2rem;
+}
+
+.checkout-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.checkout-items {
+  margin-bottom: 1rem;
+}
+
+.checkout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.checkout-item:last-child {
+  border-bottom: none;
+}
+
+.checkout-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.checkout-item-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.checkout-item-quantity {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.checkout-item-price {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.checkout-summary {
+  background: var(--background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.checkout-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.checkout-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.checkout-form input,
+.checkout-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--surface-color);
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.checkout-form input:focus,
+.checkout-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.payment-options {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.payment-option:hover {
+  border-color: var(--primary-color);
+}
+
+.payment-option input[type="radio"] {
+  width: auto;
+  margin: 0;
+}
+
+.payment-option input[type="radio"]:checked + .payment-label {
+  color: var(--primary-color);
+}
+
+.checkout-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-secondary {
+  padding: 0.8rem 1.5rem;
+  background: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+}
+
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Success Modal Styles */
+#success-modal .modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+
+.success-message {
+  padding: 2rem 0;
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--success-color, #28a745);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 1.5rem auto;
+}
+
+.success-message p {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+#success-modal .modal-actions {
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  #checkout-modal .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+  }
+  
+  .checkout-actions {
+    flex-direction: column;
+  }
+  
+  .checkout-actions button {
+    width: 100%;
+  }
+}
+
 /* Checkout Modal Styles - Product Page Only */
 body.product-page .checkout-modal {
   max-width: 600px;
@@ -2142,4 +2367,11 @@ body.product-page .footer-hours {
 body.product-page .footer-hours li {
   margin-bottom: 0.5rem;
   color: var(--text-light);
+}
+.remove-item {
+  background-color: red !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  cursor: pointer !important;
 }

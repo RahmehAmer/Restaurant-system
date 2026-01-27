@@ -64,59 +64,6 @@ init() {
   this.initializeSlider();
   this.loadContent();
 
-    // Global event delegation for remove buttons
-  document.addEventListener('click', (e) => {
-    console.log('Click detected on:', e.target); // Test all clicks
-    if (e.target.classList.contains('remove-item')) {
-            console.log('Remove button clicked globally for item:', e.target.dataset.itemId, 'Type:', typeof e.target.dataset.itemId);
-      console.log('Current cart items:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
-      e.preventDefault();
-      e.stopPropagation();
-      const itemId = e.target.dataset.itemId;
-      
-      // Remove the item
-      this.cart = this.cart.filter(item => item.id != itemId);
-      this.updateCartUI();
-      this.saveCartToStorage();
-      
-      // Re-render cart
-      this.renderCartItems();
-      this.updateCartSummary();
-      
-      console.log('Item removed via global delegation');
-    }
-  });
-        // Add event delegation to cart modal specifically
-  const cartModal = document.getElementById('cart-modal');
-  if (cartModal) {
-    console.log('Cart modal found, adding event listener');
-    cartModal.addEventListener('click', (e) => {
-      console.log('Modal click detected on:', e.target.tagName, e.target.className);
-      if (e.target.classList.contains('remove-item')) {
-        alert('Remove button clicked! Item ID: ' + e.target.dataset.itemId);
-        console.log('Remove button clicked in modal for item:', e.target.dataset.itemId, 'Type:', typeof e.target.dataset.itemId);
-        console.log('Current cart items BEFORE removal:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
-        e.preventDefault();
-        e.stopPropagation();
-        const itemId = e.target.dataset.itemId;
-        
-        // Remove the item
-        this.cart = this.cart.filter(item => item.id != itemId);
-        console.log('Cart items AFTER removal:', this.cart.map(item => ({ id: item.id, type: typeof item.id, name: item.name })));
-        
-        this.updateCartUI();
-        this.saveCartToStorage();
-        
-        // Re-render cart
-        this.renderCartItems();
-        this.updateCartSummary();
-        
-        console.log('Item removed via modal delegation');
-      }
-    });
-  } else {
-    console.log('Cart modal NOT found!');
-  }
   // Initialize product details page if on product-details.html
   if (window.location.pathname.includes('product-details.html')) {
     this.loadProductDetails();
@@ -211,6 +158,18 @@ updateCartItemDisplay(itemId) {
       });
     }
 
+    // Phone number formatting for Jordanian numbers
+    const phoneInput = document.getElementById('customer-phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+        if (value.length > 9) {
+          value = value.slice(0, 9); // Limit to 9 digits
+        }
+        e.target.value = value;
+      });
+    }
+
     // Modal backdrop clicks
     document.querySelectorAll('.modal').forEach(modal => {
       modal.addEventListener('click', (e) => {
@@ -295,7 +254,7 @@ updateCartItemDisplay(itemId) {
   
   if (!meal) return;
   
-  const existingItem = this.cart.find(item => item.id === meal.id);
+  const existingItem = this.cart.find(item => item.id == meal.id);
   
   if (existingItem) {
     existingItem.quantity += 1;
@@ -1207,22 +1166,22 @@ bindCartButtonEvents() {
   // Bind remove buttons - test approach
           
   removeButtons.forEach(btn => {
-    console.log('Binding remove button:', btn);
-    btn.onclick = (e) => {
-      alert('CLICK WORKS! Item ID: ' + btn.dataset.itemId);
+    btn.addEventListener('click', (e) => {
       console.log('Remove button clicked for item:', btn.dataset.itemId);
       e.preventDefault();
       e.stopPropagation();
       const itemId = btn.dataset.itemId;
       const cartItem = this.cart.find(item => item.id == itemId);
       if (cartItem) {
+        console.log('Removing item:', cartItem.name);
         this.removeFromCart(itemId);
         this.renderCartItems();
         this.updateCartSummary();
+        console.log('Item removed successfully!');
       } else {
         console.log('Cart item NOT found for removal!');
       }
-    };
+    });
   });
   }
 
