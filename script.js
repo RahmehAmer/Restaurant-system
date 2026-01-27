@@ -408,7 +408,7 @@ updateCartItemDisplay(itemId) {
     notification.textContent = message;
     notification.style.cssText = `
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       right: 20px;
       background-color: var(--primary-color);
       color: white;
@@ -591,7 +591,8 @@ updateCartItemDisplay(itemId) {
         category: this.getMealCategory(meal)
       }));
       console.log('Sample meal IDs:', this.allMeals.slice(0, 5).map(m => ({ id: m.id, name: m.name })));
-      
+      // Save meals to localStorage for product details page
+localStorage.setItem('allMeals', JSON.stringify(this.allMeals));
       // Sort and filter meals
       this.filterAndSortMeals();
       this.renderMeals();
@@ -604,15 +605,31 @@ updateCartItemDisplay(itemId) {
   }
 
   async loadMealsFromCategory(category) {
-    try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
-      const data = await response.json();
-      return data.meals || [];
-    } catch (error) {
-      console.error(`Error loading ${category} meals:`, error);
-      return [];
-    }
+  try {
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+    const data = await response.json();
+    const meals = data.meals || [];
+    
+    // Fetch detailed information for each meal
+    const detailedMeals = await Promise.all(
+      meals.map(async (meal) => {
+        try {
+          const detailResponse = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
+          const detailData = await detailResponse.json();
+          return detailData.meals ? detailData.meals[0] : meal;
+        } catch (error) {
+          console.error(`Error fetching details for ${meal.idMeal}:`, error);
+          return meal; // Return basic meal if detail fetch fails
+        }
+      })
+    );
+    
+    return detailedMeals;
+  } catch (error) {
+    console.error(`Error loading ${category} meals:`, error);
+    return [];
   }
+}
 
   getMealCategory(meal) {
     // Try to determine category from meal data
@@ -1457,7 +1474,19 @@ async loadProductDetails() {
   try {
     this.showLoadingState();
     
-    // Fetch from TheMealDB API
+    // First, try to find the meal in localStorage (from menu page)
+    const storedMeals = localStorage.getItem('allMeals');
+    if (storedMeals) {
+      const meals = JSON.parse(storedMeals);
+      const meal = meals.find(m => m.id == mealId); // Use loose equality for ID matching
+      
+      if (meal) {
+        this.displayProductDetails(meal);
+        return;
+      }
+    }
+    
+    // If not found in localStorage, try fetching from TheMealDB API
     const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`);
     const data = await response.json();
 
@@ -1512,26 +1541,26 @@ displayProductDetails(meal) {
     const productDescription = document.getElementById('product-description');
 
     if (productImage) {
-      productImage.src = meal.strMealThumb || 'assets/placeholder-meal.jpg';
-      productImage.alt = meal.strMeal || 'Product Image';
+      productImage.src = meal.strMealThumb || meal.image || 'assets/placeholder-meal.jpg';
+      productImage.alt = meal.strMeal || meal.name || 'Product Image';
     }
 
     if (productTitle) {
-      productTitle.textContent = meal.strMeal || 'Unknown Meal';
+      productTitle.textContent = meal.strMeal || meal.name || 'Unknown Meal';
     }
 
     if (productPrice) {
-      // Generate a price based on the meal ID for demo purposes
-      const price = (Math.abs(parseInt(meal.idMeal)) % 20 + 10) + 0.99;
-      productPrice.textContent = `$${price.toFixed(2)}`;
+      // Use the price from our meal data, or generate one for API meals
+      const price = meal.price || ((Math.abs(parseInt(meal.idMeal || meal.id)) % 20 + 10) + 0.99);
+      productPrice.textContent = `$${typeof price === 'number' ? price.toFixed(2) : price}`;
     }
 
     if (productCategory) {
-      productCategory.textContent = meal.strCategory || 'Special';
+      productCategory.textContent = meal.strCategory || meal.category || 'Special';
     }
 
     if (productDescription) {
-      productDescription.textContent = meal.strInstructions || 'Delicious meal prepared with fresh ingredients and authentic spices.';
+      productDescription.textContent = meal.strInstructions || meal.description || 'Delicious meal prepared with fresh ingredients and authentic spices.';
     }
 
     // Setup quantity controls
@@ -1539,55 +1568,51 @@ displayProductDetails(meal) {
   }
 }
 
-setupProductQuantityControls(meal) {
-  const decrementBtn = document.getElementById('decrement-btn');
-  const incrementBtn = document.getElementById('increment-btn');
-  const quantityValue = document.getElementById('quantity-value');
-  const addToCartBtn = document.getElementById('add-to-cart-btn');
+  setupProductQuantityControls(meal) {
+    const decrementBtn = document.getElementById('decrement-btn');
+    const incrementBtn = document.getElementById('increment-btn');
+    const quantityValue = document.getElementById('quantity-value');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
 
-  let quantity = 1;
+    let quantity = 1;
 
-  const updateQuantityDisplay = () => {
-    if (quantityValue) {
-      quantityValue.textContent = quantity;
-    }
-  };
-
-  if (decrementBtn) {
-    decrementBtn.addEventListener('click', () => {
-      if (quantity > 1) {
-        quantity--;
-        updateQuantityDisplay();
+    const updateQuantityDisplay = () => {
+      if (quantityValue) {
+        quantityValue.textContent = quantity;
       }
-    });
-  }
+    };
 
-  if (incrementBtn) {
-    incrementBtn.addEventListener('click', () => {
-      quantity++;
-      updateQuantityDisplay();
-    });
-  }
+    if (decrementBtn) {
+      decrementBtn.addEventListener('click', () => {
+        if (quantity > 1) {
+          quantity--;
+          updateQuantityDisplay();
+        }
+      });
+    }
 
-  if (addToCartBtn) {
-    addToCartBtn.addEventListener('click', () => {
-      const price = (Math.abs(parseInt(meal.idMeal)) % 20 + 10) + 0.99;
-      const cartItem = {
-        id: meal.idMeal,
-        name: meal.strMeal,
-        price: price,
-        image: meal.strMealThumb || 'assets/placeholder-meal.jpg',
-        quantity: quantity
-      };
+    if (incrementBtn) {
+      incrementBtn.addEventListener('click', () => {
+        quantity++;
+        updateQuantityDisplay();
+      });
+    }
 
-      this.addToCart(cartItem);
-      
-      // Reset quantity
-      quantity = 1;
-      updateQuantityDisplay();
-    });
+    if (addToCartBtn) {
+      addToCartBtn.addEventListener('click', () => {
+        // Use the meal ID from either data source
+        const mealId = meal.idMeal || meal.id;
+        const mealName = meal.strMeal || meal.name;
+        
+        this.addToCart(mealId, quantity);
+        this.showNotification(`${mealName} added to cart!`);
+        quantity = 1;
+        updateQuantityDisplay();
+      });
+    }
+
+    updateQuantityDisplay();
   }
-}
 
   // Navigation
   navigateToPage(page) {

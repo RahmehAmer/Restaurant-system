@@ -777,17 +777,20 @@ main {
 
 /* Toast Notification */
 .toast {
-  position: fixed;
-  bottom: 20px;  /* Changed from top: 20px */
-  right: 20px;    /* Changed from right: 20px */
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  top: auto !important;
+  left: auto !important;
   background: var(--primary-color);
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 8px;
   box-shadow: var(--shadow-md);
-  z-index: 1001;
+  z-index: 9999;
   transform: translateX(120%);
   transition: transform 0.3s ease;
+  min-width: 250px;
 }
 
 .toast.show {
