@@ -1653,11 +1653,12 @@ displayProductDetails(meal) {
 
     if (addToCartBtn) {
       addToCartBtn.addEventListener('click', () => {
-        // Use the meal ID from either data source
-        const mealId = meal.idMeal || meal.id;
-        const mealName = meal.strMeal || meal.name;
+        // Add the meal to cart with the specified quantity
+        for (let i = 0; i < quantity; i++) {
+          this.addToCart(meal);
+        }
         
-        this.addToCart(mealId, quantity);
+        const mealName = meal.strMeal || meal.name;
         this.showNotification(`${mealName} added to cart!`);
         quantity = 1;
         updateQuantityDisplay();
