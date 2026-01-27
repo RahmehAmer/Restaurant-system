@@ -2322,27 +2322,30 @@ body.product-page .footer-title {
   font-weight: 600;
 }
 
-body.product-page .footer-links {
+/* Footer Links Styles */
+.footer-links {
   list-style: none;
 }
 
-body.product-page .footer-links li {
+.footer-links li {
   margin-bottom: 0.5rem;
 }
 
-body.product-page .footer-links li a {
+.footer-links li a {
   color: var(--text-light);
   text-decoration: none;
   transition: var(--transition);
 }
 
-body.product-page .footer-links li a:hover {
+.footer-links li a:hover {
   color: var(--primary-color);
 }
 
-body.product-page .footer-links li:not(:has(a)) {
+.footer-links li:not(:has(a)) {
   color: var(--text-light);
 }
+
+/* Product Page Specific Footer Styles */
 
 body.product-page .social-links {
   display: flex;

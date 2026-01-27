@@ -1337,7 +1337,7 @@ validateCheckoutForm() {
 
 async submitOrderToGoogleSheets(orderData) {
   try {
-    const response = await fetch('YOUR_GOOGLE_SCRIPT_WEB_APP_URL', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbwE96xfdMu9jVJZEq1QJgCpPZlf8sHvl4-OWYYtfgmaKWMZAFqwwadw7HANOV88YQi7/exec', {
       method: 'POST',
       mode: 'no-cors',
       headers: {
