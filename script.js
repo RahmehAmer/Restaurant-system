@@ -361,14 +361,14 @@ updateCartItemDisplay(itemId) {
     if (!slider || this.sliderMeals.length === 0) return;
 
     slider.innerHTML = this.sliderMeals.map(meal => `
-      <div class="meal-slide">
+      <div class="meal-slide" onclick="window.location.href='product-details.html?id=${meal.id}'" style="cursor: pointer;">
         <img src="${meal.image}" alt="${meal.name}" class="meal-image">
         <h3 class="meal-name">${meal.name}</h3>
         <div class="meal-prices">
           <span class="meal-price">$${meal.price}</span>
           <span class="meal-price-before">$${meal.priceBefore}</span>
         </div>
-        <button class="cta-btn" onclick="restaurant.addToCart(${JSON.stringify(meal).replace(/"/g, '&quot;')})">Add to Cart</button>
+        <button class="cta-btn" onclick="event.stopPropagation(); restaurant.addToCart(${JSON.stringify(meal).replace(/"/g, '&quot;')})">Add to Cart</button>
       </div>
     `).join('');
 
