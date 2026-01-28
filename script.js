@@ -280,18 +280,14 @@ updateCartItemDisplay(itemId) {
   // Simplified ID handling for both slider and menu items
   this.cart = this.cart.filter(item => item.id != mealId);
   this.updateCartUI();
+  this.renderCartItems();
+  this.updateCartSummary();
   this.saveCartToStorage();
+  this.showNotification('Item removed from cart');
   
   // Update meal card if it exists
   this.updateMealCard(mealId);
-  
-  // Re-render cart modal if it's open
-  const cartModal = document.getElementById('cart-modal');
-  if (cartModal && cartModal.classList.contains('active')) {
-    this.renderCartItems();
-    this.updateCartSummary();
   }
-}
 
   updateCartUI() {
     const cartCount = document.querySelector('.cart-count');
@@ -1249,14 +1245,6 @@ updateCartSummary() {
   if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
 }
 
-removeFromCart(itemId) {
-  this.cart = this.cart.filter(item => item.id !== itemId);
-  this.updateCartUI();
-  this.renderCartItems();
-  this.updateCartSummary();
-  this.saveCartToStorage();
-  this.showToast('Item removed from cart');
-}
 
 checkout() {
   if (this.cart.length === 0) {
