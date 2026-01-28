@@ -1,4 +1,10 @@
 /* Sama Restaurant Styles */
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --primary-color: #CB4154;
   --secondary-color: #FFFFFF;
