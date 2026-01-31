@@ -8,7 +8,7 @@ class SamaRestaurant {
     this.currentPage = 1;
     this.mealsPerPage = 12;
     this.currentCategory = 'all';
-    this.currentSort = 'default';
+    this.currentSort = 'low-to-high';
     this.selectedMealForModal = null;
     this.mealToDelete = null;
     
@@ -752,7 +752,8 @@ localStorage.setItem('allMeals', JSON.stringify(this.allMeals));
         this.meals.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
         break;
       default:
-        // Keep original order
+        // Default to low-to-high sorting
+        this.meals.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
         break;
     }
   }
