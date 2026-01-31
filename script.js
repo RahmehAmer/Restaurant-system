@@ -63,6 +63,7 @@ init() {
   this.updateCartUI();
   this.initializeSlider();
   this.loadContent();
+  this.setupBurgerMenu();
 
   // Initialize product details page if on product-details.html
   if (window.location.pathname.includes('product-details.html')) {
@@ -93,6 +94,48 @@ updateCartItemDisplay(itemId) {
         totalDiv.textContent = `$${(parseFloat(cartItem.price) * cartItem.quantity).toFixed(2)}`;
       }
     }
+  }
+}
+
+setupBurgerMenu() {
+  const burgerMenu = document.getElementById('burger-menu');
+  const navigation = document.getElementById('navigation');
+  const body = document.body;
+
+  if (burgerMenu && navigation) {
+    burgerMenu.addEventListener('click', () => {
+      burgerMenu.classList.toggle('active');
+      navigation.classList.toggle('active');
+      body.classList.toggle('nav-open');
+    });
+
+    // Close menu when clicking on a nav link
+    const navLinks = navigation.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        burgerMenu.classList.remove('active');
+        navigation.classList.remove('active');
+        body.classList.remove('nav-open');
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!burgerMenu.contains(e.target) && !navigation.contains(e.target)) {
+        burgerMenu.classList.remove('active');
+        navigation.classList.remove('active');
+        body.classList.remove('nav-open');
+      }
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        burgerMenu.classList.remove('active');
+        navigation.classList.remove('active');
+        body.classList.remove('nav-open');
+      }
+    });
   }
 }
 
@@ -325,7 +368,7 @@ updateCartItemDisplay(itemId) {
       name: meal.strMeal,
       image: meal.strMealThumb,
       price: this.generateRandomPrice(),
-      priceBefore: this.generateRandomPrice() * 1.5
+      priceBefore: parseFloat((this.generateRandomPrice() * 1.5).toFixed(2))
     }));
     
   } catch (error) {
@@ -370,8 +413,8 @@ updateCartItemDisplay(itemId) {
         <img src="${meal.image}" alt="${meal.name}" class="meal-image">
         <h3 class="meal-name">${meal.name}</h3>
         <div class="meal-prices">
-          <span class="meal-price">$${meal.price}</span>
-          <span class="meal-price-before">$${meal.priceBefore}</span>
+          <span class="meal-price">$${meal.price.toFixed(2)}</span>
+          <span class="meal-price-before">$${meal.priceBefore.toFixed(2)}</span>
         </div>
         <button class="cta-btn" onclick="event.stopPropagation(); restaurant.addToCart(${JSON.stringify(meal).replace(/"/g, '&quot;')})">Add to Cart</button>
       </div>
@@ -648,7 +691,7 @@ localStorage.setItem('allMeals', JSON.stringify(this.allMeals));
   }
 
   generateRandomPrice() {
-    return (Math.random() * 25 + 8).toFixed(2);
+    return parseFloat((Math.random() * 25 + 8).toFixed(2));
   }
 
   loadFallbackMeals() {

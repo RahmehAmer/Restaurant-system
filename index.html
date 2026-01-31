@@ -19,6 +19,11 @@
                         <img src="assets/logo.png" alt="" id="logo-alt">
                     </a>
                 </div>
+                <button class="burger-menu" id="burger-menu" aria-label="Toggle navigation menu">
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                </button>
                 <div class="header-actions">
                     <button class="theme-toggle" aria-label="Toggle dark mode">
                         <span class="theme-icon">🌙</span>
@@ -48,12 +53,12 @@
     </section>
 
     <!-- Navigation -->
-    <nav class="navigation">
+    <nav class="navigation" id="navigation">
         <div class="container">
             <ul class="nav-links">
                 <li><a href="index.html" class="nav-link active" id="nav-home"></a></li>
                 <li><a href="menu.html" class="nav-link" id="nav-menu"></a></li>
-                <li><a href="about.html" class="nav-link" id="nav-about"></a></li>
+                <li><span class="nav-link" id="nav-about"></span></li>
                 <li><a href="#contact-section" class="nav-link" id="nav-contact"></a></li>
             </ul>
         </div>
@@ -265,12 +270,7 @@
                                 <input type="radio" name="payment" value="cash" checked>
                                 <span class="payment-label">Cash on Delivery</span>
                             </label>
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="card">
-                                <span class="payment-label">Credit Card</span>
-                            </label>
                         </div>
-                        <div class="error-message" id="payment-error" style="display: none; color: red; font-size: 0.8rem; margin-top: 0.25rem;">Please select a payment method</div>
                     </div>
                     
                     <div class="checkout-actions">

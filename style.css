@@ -1258,9 +1258,30 @@ main {
     font-size: 2rem;
   }
 
+  /* Trust badges responsive */
+  .trust-badges {
+    margin-bottom: 3rem;
+  }
+
   .trust-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .trust-item {
+    padding: 1.5rem;
+  }
+
+  .trust-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .trust-item h3 {
+    font-size: 1rem;
+    line-height: 1.3;
   }
 
   .card-content {
@@ -2513,4 +2534,639 @@ body.product-page .footer-hours li {
 .footer-links span:hover {
   color: var(--text-light);
   text-decoration: none;
+}
+
+/* Unclickable About Link in Navigation */
+.nav-links span.nav-link {
+  color: var(--text-color);
+  cursor: default;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-links span.nav-link:hover {
+  color: var(--text-color);
+  text-decoration: none;
+  transform: none;
+}
+
+.nav-links span.nav-link.active {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+/* Burger Menu Styles */
+.burger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  z-index: 1001;
+}
+
+.burger-line {
+  width: 25px;
+  height: 3px;
+  background-color: var(--text-color);
+  margin: 2px 0;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.burger-menu.active .burger-line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.burger-menu.active .burger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.burger-menu.active .burger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Navigation Mobile Styles */
+.navigation {
+  transition: all 0.3s ease;
+}
+
+.navigation .nav-links {
+  transition: all 0.3s ease;
+}
+
+/* Responsive Design - Mobile & Tablet */
+@media (max-width: 768px) {
+  .burger-menu {
+    display: flex;
+  }
+
+  .navigation {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: var(--background-color);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .navigation.active {
+    left: 0;
+  }
+
+  .navigation .container {
+    padding: 80px 20px 20px;
+  }
+
+  .navigation .nav-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .navigation .nav-links li {
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .navigation .nav-links li:last-child {
+    border-bottom: none;
+  }
+
+  .navigation .nav-link {
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 0;
+  }
+
+  .navigation .nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: none;
+  }
+
+  .navigation .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  /* Header adjustments for mobile */
+  .header-content {
+    position: relative;
+  }
+
+  /* Overlay for mobile */
+  body.nav-open::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Container adjustments */
+  .container {
+    padding: 0 15px;
+  }
+
+  /* Header responsive */
+  .header-content {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  .header-actions .cta-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Hero section responsive */
+  .hero-headline {
+    font-size: 2rem;
+  }
+
+  .hero-subheadline {
+    font-size: 1rem;
+  }
+
+  .hero-cta {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Navigation responsive */
+  .nav-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+
+  /* Special offers responsive */
+  .special-offers-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .offer-card {
+    padding: 1rem;
+  }
+
+  .offer-title {
+    font-size: 1.2rem;
+  }
+
+  .offer-price {
+    font-size: 1.5rem;
+  }
+
+  /* Features responsive */
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .feature-card {
+    padding: 1rem;
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .feature-title {
+    font-size: 1rem;
+  }
+
+  /* Testimonials responsive */
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .testimonial-card {
+    padding: 1rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.95rem;
+  }
+
+  .testimonial-author {
+    font-size: 0.9rem;
+  }
+
+  /* Contact section responsive */
+  .contact-content {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .contact-info {
+    text-align: center;
+  }
+
+  .contact-form {
+    max-width: 100%;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem;
+  }
+
+  /* Footer responsive */
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .footer-column h3 {
+    font-size: 1.1rem;
+  }
+
+  .footer-links {
+    justify-content: center;
+  }
+
+  /* Menu page responsive */
+  .meals-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .meal-card {
+    padding: 1rem;
+  }
+
+  .meal-title {
+    font-size: 1rem;
+  }
+
+  .meal-price {
+    font-size: 1.2rem;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .category-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Product details responsive */
+  .product-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .product-image {
+    height: 250px;
+  }
+
+  .product-title {
+    font-size: 1.8rem;
+  }
+
+  .product-price {
+    font-size: 1.5rem;
+  }
+
+  .product-description {
+    font-size: 1rem;
+  }
+
+  /* Cart modal responsive */
+  .cart-modal-content {
+    width: 95%;
+    max-width: 400px;
+    margin: 1rem;
+  }
+
+  .cart-item {
+    padding: 0.75rem;
+  }
+
+  .cart-item-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .cart-item-price {
+    font-size: 0.9rem;
+  }
+
+  /* Checkout modal responsive */
+  .checkout-modal .modal-content {
+    width: 95%;
+    max-width: 400px;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .checkout-section {
+    padding: 1rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .checkout-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .checkout-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small mobile adjustments */
+  .container {
+    padding: 0 10px;
+  }
+
+  .hero-headline {
+    font-size: 1.5rem;
+  }
+
+  .hero-subheadline {
+    font-size: 0.9rem;
+  }
+
+  .hero-cta {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .header-actions {
+    gap: 0.25rem;
+  }
+
+  .header-actions .theme-toggle,
+  .header-actions .cart-btn {
+    width: 35px;
+    height: 35px;
+  }
+
+  .header-actions .cta-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .meals-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .meal-card {
+    padding: 0.75rem;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .category-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .product-image {
+    height: 200px;
+  }
+
+  .product-title {
+    font-size: 1.5rem;
+  }
+
+  .product-price {
+    font-size: 1.3rem;
+  }
+
+  .cart-modal-content {
+    width: 98%;
+    margin: 0.5rem;
+  }
+
+  .checkout-modal .modal-content {
+    width: 98%;
+    margin: 0.5rem;
+  }
+
+  /* Trust badges responsive - Extra small mobile */
+  .trust-badges {
+    margin-bottom: 2rem;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 300px;
+  }
+
+  .trust-item {
+    padding: 1rem;
+  }
+
+  .trust-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .trust-item h3 {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 20px;
+  }
+
+  .hero-headline {
+    font-size: 2.5rem;
+  }
+
+  .hero-subheadline {
+    font-size: 1.1rem;
+  }
+
+  .meals-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .special-offers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .product-container {
+    max-width: 600px;
+    gap: 2rem;
+  }
+
+  .product-image {
+    height: 350px;
+  }
+
+  .cart-modal-content {
+    max-width: 500px;
+  }
+
+  .checkout-modal .modal-content {
+    max-width: 500px;
+  }
+
+  /* Trust badges responsive - Tablet */
+  .trust-badges {
+    margin-bottom: 3.5rem;
+  }
+
+  .trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 700px;
+  }
+
+  .trust-item {
+    padding: 1.75rem;
+  }
+
+  .trust-icon {
+    font-size: 2.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .trust-item h3 {
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1200px;
+  }
+
+  .hero-headline {
+    font-size: 3.5rem;
+  }
+
+  .hero-subheadline {
+    font-size: 1.3rem;
+  }
+
+  .meals-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .special-offers-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  /* Trust badges responsive - Large Desktop */
+  .trust-badges {
+    margin-bottom: 4rem;
+  }
+
+  .trust-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+    max-width: 1200px;
+  }
+
+  .trust-item {
+    padding: 2.25rem;
+  }
+
+  .trust-icon {
+    font-size: 3.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .trust-item h3 {
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
 }
