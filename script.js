@@ -571,12 +571,9 @@ updateCartItemDisplay(itemId) {
     this.renderCategories();
     this.setupMenuEventListeners();
     this.attachMealCardListeners();
-    this.hideLoadingState();
   }
 
   async loadMenuMeals() {
-    this.showLoadingState();
-    
     try {
       // Load meals from all categories
       const categoryPromises = this.categories
@@ -1019,20 +1016,6 @@ localStorage.setItem('allMeals', JSON.stringify(this.allMeals));
     const toast = document.getElementById('toast');
     if (toast) {
       toast.classList.remove('show');
-    }
-  }
-
-  showLoadingState() {
-    const loadingState = document.getElementById('loading-state');
-    if (loadingState) {
-      loadingState.classList.add('active');
-    }
-  }
-
-  hideLoadingState() {
-    const loadingState = document.getElementById('loading-state');
-    if (loadingState) {
-      loadingState.classList.remove('active');
     }
   }
 

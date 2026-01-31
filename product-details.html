@@ -201,37 +201,38 @@
     </div>
 
     <!-- Cart Modal -->
-    <div class="modal" id="cart-modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div id="cart-modal" class="modal">
+        <div class="modal-content cart-modal-content">
+            <div class="cart-header">
                 <h2>Your Cart</h2>
-                <button class="modal-close" id="cart-modal-close">&times;</button>
+                <button class="close-btn" id="cart-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="cart-items" id="cart-items">
-                    <!-- Cart items will be rendered here -->
+            
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be populated here -->
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="cart-subtotal">$0.00</span>
                 </div>
-                <div class="cart-summary">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="cart-subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Tax (10%):</span>
-                        <span id="cart-tax">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Delivery:</span>
-                        <span id="cart-delivery">$0.00</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total:</span>
-                        <span id="cart-total">$0.00</span>
-                    </div>
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span id="cart-tax">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span id="cart-delivery">$5.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="cart-total">$0.00</span>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="cta-btn" id="checkout-btn">Proceed to Checkout</button>
+            
+            <div class="cart-actions">
+                <button class="cta-btn checkout-btn" id="checkout-btn">Checkout</button>
             </div>
         </div>
     </div>

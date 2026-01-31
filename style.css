@@ -1627,6 +1627,64 @@ body.product-page .product-info-section {
   max-width: 600px;
   text-align: center;
 }
+/* Smaller Add to Cart Button - Product Details Page */
+body.product-page .quantity-card {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+body.product-page .add-to-cart-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+body.product-page .quantity-controls {
+  max-width: 200px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--background-color);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  flex-shrink: 0;
+}
+
+body.product-page .quantity-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+body.product-page .quantity-btn:hover {
+  background: #b03648;
+  transform: scale(1.05);
+}
+
+body.product-page .quantity-value {
+  font-size: 1.1rem;
+  min-width: 50px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-color);
+}
 
 body.product-page .product-title {
   font-size: 2.5rem;
@@ -1686,10 +1744,18 @@ body.product-page .product-category {
   margin-top: 0.5rem;
   transition: var(--transition);
   align-self: flex-start;
+  opacity: 1;
+  visibility: visible;
+  display: inline-block;
 }
 
 .read-more-btn:hover {
-  background: var(--primary-dark);
+  background: var(--primary-color);
+  color: white;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(203, 65, 84, 0.3);
 }
 
 body.product-page .product-description {
